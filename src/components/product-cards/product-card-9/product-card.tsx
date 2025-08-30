@@ -1,26 +1,28 @@
-import Link from "next/link";
-import Card from "@mui/material/Card";
-import Rating from "@mui/material/Rating";
-import styled from "@mui/material/styles/styled";
+import Link from "next/link"
+import Card from "@mui/material/Card"
+import Rating from "@mui/material/Rating"
+import styled from "@mui/material/styles/styled"
 // GLOBAL CUSTOM COMPONENTS
-import { H5 } from "components/Typography";
-import LazyImage from "components/LazyImage";
+import { H5 } from "components/Typography"
+import LazyImage from "components/LazyImage"
 // LOCAL CUSTOM HOOK
-import useProduct from "../use-product";
+import useProduct from "../use-product"
 // LOCAL CUSTOM COMPONENTS
-import DiscountChip from "../discount-chip";
-import ProductPrice from "../product-price";
-import ProductTags from "./components/tags";
-import AddToCartButton from "./components/add-to-cart";
-import FavoriteButton from "./components/favorite-button";
+import DiscountChip from "../discount-chip"
+import ProductPrice from "../product-price"
+import ProductTags from "./components/tags"
+import AddToCartButton from "./components/add-to-cart"
+import FavoriteButton from "./components/favorite-button"
+import Product from "models/Product.model"
+import { useMemo } from "react"
 
 // STYLED COMPONENT
 const Wrapper = styled(Card)({
   width: "100%",
   overflow: "hidden",
   position: "relative",
-  marginBottom: "1.25rem"
-});
+  marginBottom: "1.25rem",
+})
 
 const ContentWrapper = styled("div")(({ theme }) => ({
   display: "flex",
@@ -31,7 +33,7 @@ const ContentWrapper = styled("div")(({ theme }) => ({
     width: 150,
     flexShrink: 0,
     position: "relative",
-    backgroundColor: theme.palette.grey[200]
+    backgroundColor: theme.palette.grey[200],
   },
 
   "& .content": {
@@ -39,77 +41,78 @@ const ContentWrapper = styled("div")(({ theme }) => ({
     padding: "1rem",
     display: "flex",
     alignItems: "flex-end",
-    justifyContent: "space-between"
+    justifyContent: "space-between",
   },
 
   [theme.breakpoints.down("sm")]: {
     flexDirection: "column",
     alignItems: "flex-start",
     "& .img-wrapper": { width: "100%" },
-    "& .content": { width: "100%" }
-  }
-}));
+    "& .content": { width: "100%" },
+  },
+}))
 
 // ===========================================================
 type Props = {
-  id: string;
-  off?: number;
-  slug: string;
-  price: number;
-  title: string;
-  imgUrl: string;
-  rating: number;
-};
+  product: Product
+}
 // ===========================================================
 
-export default function ProductCard9(props: Props) {
-  const { imgUrl, title, price, off, rating, id, slug } = props || {};
+export default function ProductCard9({ product }: Props) {
+  const {
+    slug,
+    name: title,
+    asset: { preview: thumbnail },
+    price,
+    description,
+    listPrice,
+    id,
+  } = product || {}
 
-  const { cartItem, handleCartAmountChange, isFavorite, toggleFavorite } = useProduct(slug);
+  const { cartItem, handleCartAmountChange, isFavorite, toggleFavorite } =
+    useProduct(slug)
 
   const handleIncrementQuantity = () => {
     const product = {
       id,
       slug,
       price,
-      imgUrl,
+      imgUrl: thumbnail,
       name: title,
-      qty: (cartItem?.qty || 0) + 1
-    };
-    handleCartAmountChange(product);
-  };
+      qty: (cartItem?.qty || 0) + 1,
+    }
+    handleCartAmountChange(product)
+  }
 
   const handleDecrementQuantity = () => {
     const product = {
       id,
       slug,
       price,
-      imgUrl,
+      imgUrl: thumbnail,
       name: title,
-      qty: (cartItem?.qty || 0) - 1
-    };
-    handleCartAmountChange(product, "remove");
-  };
+      qty: (cartItem?.qty || 0) - 1,
+    }
+    handleCartAmountChange(product, "remove")
+  }
+
+  const discount = useMemo(() => {
+    if (!listPrice) return null
+
+    return Math.round(((listPrice - price) / listPrice) * 100)
+  }, [price, listPrice])
 
   return (
     <Wrapper>
-      {/* PRODUCT FAVORITE BUTTON */}
-      <FavoriteButton isFavorite={isFavorite} toggleFavorite={toggleFavorite} />
-
       <ContentWrapper>
         <div className="img-wrapper">
-          {/* DISCOUNT PERCENT CHIP IF AVAILABLE */}
-          <DiscountChip discount={off} />
-
-          {/* PRODUCT IMAGE / THUMBNAIL */}
-          <LazyImage src={imgUrl} alt={title} width={500} height={500} />
+          <Link href={`/products/${slug}`}>
+            <LazyImage src={thumbnail} alt={title} width={500} height={500} />
+          </Link>
         </div>
 
         <div className="content">
           <div>
-            {/* PRODUCT TAG LIST */}
-            <ProductTags tags={["Bike", "Motor", "Ducati"]} />
-
             {/* PRODUCT TITLE / NAME */}
             <Link href={`/products/${slug}`}>
               <H5 fontWeight="700" mt={1} mb={2}>
@@ -117,11 +120,9 @@ export default function ProductCard9(props: Props) {
               </H5>
             </Link>
 
-            {/* PRODUCT RATING / REVIEW  */}
-            <Rating size="small" value={rating} color="warn" readOnly />
-
             {/* PRODUCT PRICE */}
-            <ProductPrice price={price} discount={off} />
+            <ProductPrice price={price} listPrice={listPrice} />
+            <DiscountChip discount={discount} />
           </div>
 
           {/* PRODUCT ADD TO CART BUTTON */}
@@ -133,5 +134,5 @@ export default function ProductCard9(props: Props) {
         </div>
       </ContentWrapper>
     </Wrapper>
-  );
+  )
 }

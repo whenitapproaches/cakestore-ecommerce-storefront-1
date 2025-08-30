@@ -54,4 +54,37 @@ function currency(price: number, fraction: number = 2) {
   return formatCurrency;
 }
 
+const formatter = new Intl.NumberFormat('vi-VN', {
+  style: 'currency',
+  currency: 'VND',
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
+})
+export const formatCurrency = (price: number) => formatter.format(price / Math.pow(10, 2));
+
+// Export all API utilities (excluding useApi to avoid conflicts)
+export { 
+  api, 
+  ApiClient, 
+  productsApi, 
+  categoriesApi, 
+  ordersApi, 
+  authApi, 
+  handleApiError,
+  type ApiResponse,
+  type ApiError,
+  type HttpMethod,
+  type RequestOptions
+} from './api'
+
+// Export React hooks for client-side API calls
+export { 
+  useApi,
+  useProducts,
+  useCategories,
+  useOrders,
+  useAuth,
+  useCustomApi
+} from './useApiClient'
+
 export { currency, getDateDifference, calculateDiscount, renderProductCount };

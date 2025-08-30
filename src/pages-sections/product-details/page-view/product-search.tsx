@@ -1,61 +1,204 @@
-"use client";
+"use client"
 
-import { useCallback, useState } from "react";
-import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
-import { Theme } from "@mui/material/styles";
-import MenuItem from "@mui/material/MenuItem";
-import TextField from "@mui/material/TextField";
-import Container from "@mui/material/Container";
-import IconButton from "@mui/material/IconButton";
-import useMediaQuery from "@mui/material/useMediaQuery";
+import { useCallback, useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import Box from "@mui/material/Box"
+import Grid from "@mui/material/Grid"
+import { Theme } from "@mui/material/styles"
+import MenuItem from "@mui/material/MenuItem"
+import TextField from "@mui/material/TextField"
+import Container from "@mui/material/Container"
+import IconButton from "@mui/material/IconButton"
+import useMediaQuery from "@mui/material/useMediaQuery"
 // MUI ICON COMPONENTS
-import Apps from "@mui/icons-material/Apps";
-import ViewList from "@mui/icons-material/ViewList";
-import FilterList from "@mui/icons-material/FilterList";
+import Apps from "@mui/icons-material/Apps"
+import ViewList from "@mui/icons-material/ViewList"
+import FilterList from "@mui/icons-material/FilterList"
 // Local CUSTOM COMPONENT
-import ProductFilterCard from "../product-filter-card";
+import ProductFilterCard from "../product-filter-card"
 // GLOBAL CUSTOM COMPONENTS
-import Sidenav from "components/side-nav";
-import { H5, Paragraph } from "components/Typography";
-import { FlexBetween, FlexBox } from "components/flex-box";
-import ProductsGridView from "components/products-view/products-grid-view";
-import ProductsListView from "components/products-view/products-list-view";
+import Sidenav from "components/side-nav"
+import { H5, Paragraph } from "components/Typography"
+import { FlexBetween, FlexBox } from "components/flex-box"
+import ProductsGridView from "components/products-view/products-grid-view"
+import ProductsListView from "components/products-view/products-list-view"
 // PRODUCT DATA
-import productDatabase from "data/product-database";
+import productDatabase from "data/product-database"
 // TYPE
-import { ProductFilterKeys, ProductFilterValues, ProductFilters } from "../types";
+import {
+  ProductFilterKeys,
+  ProductFilterValues,
+  ProductFilters,
+} from "../types"
+import Product from "models/Product.model"
+import { useTranslation } from "react-i18next"
 
 const SORT_OPTIONS = [
-  { label: "Relevance", value: "relevance" },
-  { label: "Date", value: "date" },
-  { label: "Price Low to High", value: "asc" },
-  { label: "Price High to Low", value: "desc" }
-];
+  { key: "date", value: "date" },
+  { key: "price", value: "price-asc" },
+  { key: "price-desc", value: "price-desc" },
+]
 
 const initialFilters = {
   rating: 0,
   color: [],
   brand: [],
   sales: [],
-  price: [0, 300]
-};
+  price: [0, 300],
+}
 
-export default function ProductSearchPageView() {
-  const [view, setView] = useState("grid");
-  const [sortBy, setSortBy] = useState("relevance");
-  const [filters, setFilters] = useState<ProductFilters>({ ...initialFilters });
-  const downMd = useMediaQuery((theme: Theme) => theme.breakpoints.down("md"));
+interface ProductSearchPageViewProps {
+  products?: Product[]
+  total?: number
+  initialFilters?: {
+    page: number
+    limit: number
+    sortBy: string
+    view: string
+    filters: ProductFilters
+    search: string
+  }
+}
 
-  const handleChangeFilters = (key: ProductFilterKeys, values: ProductFilterValues) => {
-    setFilters((prev) => ({ ...prev, [key]: values }));
-  };
+export default function ProductSearchPageView({
+  products,
+  total,
+  initialFilters,
+}: ProductSearchPageViewProps) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  
+  const [view, setView] = useState(initialFilters?.view || "grid")
+  const [sortBy, setSortBy] = useState(initialFilters?.sortBy || "date")
+  const [filters, setFilters] = useState<ProductFilters>(initialFilters?.filters || {
+    rating: 0,
+    color: [],
+    brand: [],
+    sales: [],
+    price: [0, 300],
+  })
+  const [page, setPage] = useState(initialFilters?.page || 1)
+  const [limit] = useState(initialFilters?.limit || 12)
+  const [search, setSearch] = useState(initialFilters?.search || "")
+  
+  const downMd = useMediaQuery((theme: Theme) => theme.breakpoints.down("md"))
 
-  const handleChangeSortBy = useCallback((v: string) => setSortBy(v), []);
+  const { t } = useTranslation()
 
-  const toggleView = useCallback((v: string) => () => setView(v), []);
+  // Sync state with URL changes (for browser back/forward)
+  useEffect(() => {
+    if (initialFilters) {
+      setView(initialFilters.view)
+      setSortBy(initialFilters.sortBy)
+      setFilters(initialFilters.filters)
+      setPage(initialFilters.page)
+      setSearch(initialFilters.search)
+    }
+  }, [initialFilters])
 
-  const PRODUCTS = productDatabase.slice(95, 104).map((pro) => ({ ...pro, discount: 25 }));
+  // Function to update URL with current state
+  const updateURL = useCallback((newParams: {
+    page?: number
+    sortBy?: string
+    view?: string
+    filters?: ProductFilters
+    search?: string
+  }) => {
+    const params = new URLSearchParams(searchParams.toString())
+    
+    // Update page
+    if (newParams.page) {
+      params.set('page', newParams.page.toString())
+    }
+    
+    // Update sortBy
+    if (newParams.sortBy) {
+      params.set('sortBy', newParams.sortBy)
+    }
+    
+    // Update view
+    if (newParams.view) {
+      params.set('view', newParams.view)
+    }
+    
+    // Update search
+    if (newParams.search !== undefined) {
+      if (newParams.search) {
+        params.set('search', newParams.search)
+      } else {
+        params.delete('search')
+      }
+    }
+    
+    // Update filters
+    if (newParams.filters) {
+      const filters = newParams.filters
+      
+      // Brand filter
+      if (filters.brand?.length) {
+        params.set('brand', filters.brand.join(','))
+      } else {
+        params.delete('brand')
+      }
+      
+      // Color filter
+      if (filters.color?.length) {
+        params.set('color', filters.color.join(','))
+      } else {
+        params.delete('color')
+      }
+      
+      // Sales filter
+      if (filters.sales?.length) {
+        params.set('sales', filters.sales.join(','))
+      } else {
+        params.delete('sales')
+      }
+      
+      // Price filter
+      if (filters.price?.length && (filters.price[0] !== 0 || filters.price[1] !== 300)) {
+        params.set('price', filters.price.join(','))
+      } else {
+        params.delete('price')
+      }
+      
+      // Rating filter
+      if (filters.rating && filters.rating > 0) {
+        params.set('rating', filters.rating.toString())
+      } else {
+        params.delete('rating')
+      }
+    }
+    
+    // Navigate to the new URL
+    router.push(`/shop?${params.toString()}`)
+  }, [router, searchParams])
+
+  const handleChangeFilters = useCallback((
+    key: ProductFilterKeys,
+    values: ProductFilterValues
+  ) => {
+    const newFilters = { ...filters, [key]: values }
+    setFilters(newFilters)
+    setPage(1) // Reset to first page when filters change
+    updateURL({ page: 1, filters: newFilters })
+  }, [filters, updateURL])
+
+  const handleChangeSortBy = useCallback((v: string) => {
+    setSortBy(v)
+    setPage(1) // Reset to first page when sort changes
+    updateURL({ page: 1, sortBy: v })
+  }, [updateURL])
+
+  const toggleView = useCallback((v: string) => () => {
+    setView(v)
+    updateURL({ view: v })
+  }, [updateURL])
+
+  const handlePageChange = useCallback((newPage: number) => {
+    setPage(newPage)
+    updateURL({ page: newPage })
+  }, [updateURL])
 
   return (
     <div className="bg-white pt-2 pb-4">
@@ -64,15 +207,15 @@ export default function ProductSearchPageView() {
         <FlexBetween flexWrap="wrap" gap={2} mb={2}>
           <div>
             <H5 lineHeight={1} mb={1}>
-              Searching for “ mobile phone ”
+              {t("Searching for")} &quot; mobile phone &quot;
             </H5>
-            <Paragraph color="grey.600">48 results found</Paragraph>
+            <Paragraph color="grey.600">{total} {t("results found")}</Paragraph>
           </div>
 
           <FlexBox alignItems="center" columnGap={4} flexWrap="wrap">
             <FlexBox alignItems="center" gap={1} flex="1 1 0">
               <Paragraph color="grey.600" whiteSpace="pre">
-                Sort by:
+                {t("Sort by")}:
               </Paragraph>
 
               <TextField
@@ -83,10 +226,11 @@ export default function ProductSearchPageView() {
                 variant="outlined"
                 placeholder="Sort by"
                 onChange={(e) => handleChangeSortBy(e.target.value)}
-                sx={{ flex: "1 1 0", minWidth: "150px" }}>
+                sx={{ flex: "1 1 0", minWidth: "150px" }}
+              >
                 {SORT_OPTIONS.map((item) => (
                   <MenuItem value={item.value} key={item.value}>
-                    {item.label}
+                    {t(`sort.${item.key}`)}
                   </MenuItem>
                 ))}
               </TextField>
@@ -94,15 +238,21 @@ export default function ProductSearchPageView() {
 
             <FlexBox alignItems="center" my="0.25rem">
               <Paragraph color="grey.600" mr={1}>
-                View:
+                {t("View")}:
               </Paragraph>
 
               <IconButton onClick={toggleView("grid")}>
-                <Apps fontSize="small" color={view === "grid" ? "primary" : "inherit"} />
+                <Apps
+                  fontSize="small"
+                  color={view === "grid" ? "primary" : "inherit"}
+                />
               </IconButton>
 
               <IconButton onClick={toggleView("list")}>
-                <ViewList fontSize="small" color={view === "list" ? "primary" : "inherit"} />
+                <ViewList
+                  fontSize="small"
+                  color={view === "list" ? "primary" : "inherit"}
+                />
               </IconButton>
 
               {/* SHOW IN THE SMALL DEVICE */}
@@ -112,9 +262,13 @@ export default function ProductSearchPageView() {
                     <IconButton onClick={close}>
                       <FilterList fontSize="small" />
                     </IconButton>
-                  )}>
+                  )}
+                >
                   <Box px={3} py={2}>
-                    <ProductFilterCard filters={filters} changeFilters={handleChangeFilters} />
+                    <ProductFilterCard
+                      filters={filters}
+                      changeFilters={handleChangeFilters}
+                    />
                   </Box>
                 </Sidenav>
               )}
@@ -123,21 +277,40 @@ export default function ProductSearchPageView() {
         </FlexBetween>
 
         <Grid container spacing={4}>
-          {/* PRODUCT FILTER SIDEBAR AREA */}
-          <Grid item xl={2} md={3} sx={{ display: { md: "block", xs: "none" } }}>
-            <ProductFilterCard filters={filters} changeFilters={handleChangeFilters} />
+          <Grid
+            item
+            xl={2}
+            md={3}
+            sx={{ display: { md: "block", xs: "none" } }}
+          >
+            <ProductFilterCard
+              filters={filters}
+              changeFilters={handleChangeFilters}
+            />
           </Grid>
 
           {/* PRODUCT VIEW AREA */}
           <Grid item xl={10} md={9} xs={12}>
             {view === "grid" ? (
-              <ProductsGridView products={PRODUCTS} />
+              <ProductsGridView 
+                products={products || []} 
+                total={total || 0}
+                page={page}
+                limit={limit}
+                onPageChange={handlePageChange}
+              />
             ) : (
-              <ProductsListView products={PRODUCTS} />
+              <ProductsListView 
+                products={products || []} 
+                total={total || 0}
+                page={page}
+                limit={limit}
+                onPageChange={handlePageChange}
+              />
             )}
           </Grid>
         </Grid>
       </Container>
     </div>
-  );
+  )
 }

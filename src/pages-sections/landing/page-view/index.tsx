@@ -25,7 +25,6 @@ export default function IndexPageView() {
       <Section3 filterDemo={filterDemo} setFilterDemo={handleChangeFilter} />
       <Section4 />
       <Footer />
-      <Setting />
     </Box>
   );
 }

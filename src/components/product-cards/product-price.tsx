@@ -3,22 +3,22 @@ import Box from "@mui/material/Box";
 import FlexBox from "components/flex-box/flex-box";
 import { Paragraph } from "components/Typography";
 // CUSTOM UTILS LIBRARY FUNCTIONS
-import { calculateDiscount, currency } from "lib";
+import { formatCurrency } from "lib";
 
 // ==============================================================
-type Props = { price: number; discount: number };
+type Props = { price: number; listPrice: number };
 // ==============================================================
 
-export default function ProductPrice({ discount, price }: Props) {
+export default function ProductPrice({ listPrice, price }: Props) {
   return (
     <FlexBox alignItems="center" gap={1} mt={0.5}>
-      <Paragraph fontWeight={600} color="primary.main">
-        {calculateDiscount(price, discount)}
+      <Paragraph fontWeight={600} color={`${listPrice ? 'success.main' : 'text.main'}`}>
+        {formatCurrency(price)}
       </Paragraph>
 
-      {discount ? (
+      {listPrice ? (
         <Box component="del" fontWeight={600} color="grey.600">
-          {currency(price)}
+          {formatCurrency(listPrice)}
         </Box>
       ) : null}
     </FlexBox>

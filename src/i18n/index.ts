@@ -9,4 +9,9 @@ i18next.use(initReactI18next).init({
   lng: "vi",
   fallbackLng: "vi",
   interpolation: { escapeValue: false },
+  react: {
+    useSuspense: false, // This is important for SSR
+  },
 });
+
+export default i18next;

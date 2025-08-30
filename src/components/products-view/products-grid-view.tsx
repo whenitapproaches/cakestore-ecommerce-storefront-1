@@ -9,23 +9,43 @@ import ProductCard16 from "components/product-cards/product-card-16";
 import Product from "models/Product.model";
 
 // ========================================================
-type Props = { products: Product[] };
+type Props = { 
+  products: Product[]
+  total?: number
+  page?: number
+  limit?: number
+  onPageChange?: (page: number) => void
+};
 // ========================================================
 
-export default function ProductsGridView({ products }: Props) {
+export default function ProductsGridView({ 
+  products, 
+  total = 0, 
+  page = 1, 
+  limit = 12,
+  onPageChange 
+}: Props) {
   return (
     <Fragment>
-      <Grid container spacing={3}>
+      <Grid container spacing={8}>
         {products.map((item: Product) => (
-          <Grid item lg={4} sm={6} xs={12} key={item.id}>
+          <Grid item lg={4} sm={6} xs={12} key={item.slug}>
             <ProductCard16 product={item} />
           </Grid>
         ))}
       </Grid>
 
       <FlexBetween flexWrap="wrap" mt={6}>
-        <Span color="grey.600">Showing 1-9 of 1.3k Products</Span>
-        <Pagination count={Math.ceil(products.length / 10)} variant="outlined" color="primary" />
+        <Span color="grey.600">
+          Showing {(page - 1) * limit + 1}-{Math.min(page * limit, total)} of {total} Products
+        </Span>
+        <Pagination 
+          count={Math.ceil(total / limit)} 
+          page={page}
+          variant="outlined" 
+          color="primary" 
+          onChange={(_, newPage) => onPageChange?.(newPage)}
+        />
       </FlexBetween>
     </Fragment>
   );

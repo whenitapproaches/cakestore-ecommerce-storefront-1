@@ -28,8 +28,7 @@ interface LanguageOption {
 
 // LANGUAGE OPTIONS
 const languageOptions: LanguageOption = {
-  en: { title: "EN", value: "en" },
-  es: { title: "DE", value: "de" }
+  vi: { title: "VI", value: "vi" }
 };
 
 const socialLinks = [
