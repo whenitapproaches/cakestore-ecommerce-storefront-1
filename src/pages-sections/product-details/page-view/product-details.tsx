@@ -23,7 +23,7 @@ export default function ProductDetailsPageView(props: Props) {
       <ProductIntro product={props.product} />
 
       {/* PRODUCT DESCRIPTION AND REVIEW */}
-      <ProductTabs />
+      <ProductTabs description={props.product.description} />
 
       {/* FREQUENTLY BOUGHT PRODUCTS AREA */}
       <FrequentlyBought products={props.frequentlyBought} />

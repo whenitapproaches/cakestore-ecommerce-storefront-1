@@ -8,6 +8,8 @@ import styled from "@mui/material/styles/styled";
 // LOCAL CUSTOM COMPONENTS
 import ProductReview from "./product-review";
 import ProductDescription from "./product-description";
+// TRANSLATION
+import { useTranslation } from "react-i18next";
 
 // STYLED COMPONENT
 const StyledTabs = styled(Tabs)(({ theme }) => ({
@@ -22,7 +24,12 @@ const StyledTabs = styled(Tabs)(({ theme }) => ({
   }
 }));
 
-export default function ProductTabs() {
+interface Props {
+  description?: string;
+}
+
+export default function ProductTabs({ description }: Props) {
+  const { t } = useTranslation();
   const [selectedOption, setSelectedOption] = useState(0);
   const handleOptionClick = (_, value: number) => setSelectedOption(value);
 
@@ -33,12 +40,12 @@ export default function ProductTabs() {
         value={selectedOption}
         indicatorColor="primary"
         onChange={handleOptionClick}>
-        <Tab className="inner-tab" label="Description" />
-        <Tab className="inner-tab" label="Review (3)" />
+        <Tab className="inner-tab" label={t("Description")} />
+        <Tab className="inner-tab" label={`${t("Review")} (3)`} />
       </StyledTabs>
 
       <Box mb={6}>
-        {selectedOption === 0 && <ProductDescription />}
+        {selectedOption === 0 && <ProductDescription description={description} />}
         {selectedOption === 1 && <ProductReview />}
       </Box>
     </>

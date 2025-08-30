@@ -218,7 +218,7 @@ export const productsApi = {
   },
   
   // Get product by slug
-  getBySlug: (slug: string) => api.get(`/api/products/slug`, { slug }),
+  getBySlug: (slug: string) => api.get(`/api/products/${slug}`),
   
   // Search products
   search: (name?: string, category?: string) => 
