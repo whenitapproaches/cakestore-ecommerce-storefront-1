@@ -18,12 +18,15 @@ import LazyImage from "components/LazyImage"
 import { H1, H2, H3, H6, Paragraph } from "components/Typography"
 import { FlexBox, FlexRowCenter } from "components/flex-box"
 import DiscountChip from "components/product-cards/discount-chip"
+import QuantityStepper from "components/QuantityStepper"
 // CUSTOM UTILS LIBRARY FUNCTION
 import { formatCurrency, calculateDiscount } from "lib"
 // CUSTOM DATA MODEL
 import Product from "models/Product.model"
 // TRANSLATION
 import { useTranslation } from "react-i18next"
+// TOAST NOTIFICATION
+import { useToast } from "contexts/ToastContext"
 
 // ================================================================
 type Props = { product: Product }
@@ -31,6 +34,7 @@ type Props = { product: Product }
 
 export default function ProductIntro({ product }: Props) {
   const { t } = useTranslation()
+  const { showToast } = useToast()
 
   // Extract data from the new GraphQL structure
   const {
@@ -72,7 +76,8 @@ export default function ProductIntro({ product }: Props) {
   const [selectVariants, setSelectVariants] = useState<Record<string, string>>(
     {}
   )
-  
+  const [quantity, setQuantity] = useState(1)
+
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -80,12 +85,15 @@ export default function ProductIntro({ product }: Props) {
   useEffect(() => {
     if (optionGroups && optionGroups.length > 0) {
       const initialVariants: Record<string, string> = {}
-      
+
       optionGroups.forEach((optionGroup) => {
         const optionGroupName = optionGroup.name.toLowerCase()
         const urlValue = searchParams.get(optionGroupName)
-        
-        if (urlValue && optionGroup.options.some(opt => opt.name === urlValue)) {
+
+        if (
+          urlValue &&
+          optionGroup.options.some((opt) => opt.name === urlValue)
+        ) {
           // Use value from URL if it exists and is valid
           initialVariants[optionGroupName] = urlValue
         } else if (optionGroup.options.length > 0) {
@@ -93,21 +101,25 @@ export default function ProductIntro({ product }: Props) {
           initialVariants[optionGroupName] = optionGroup.options[0].name
         }
       })
-      
+
       setSelectVariants(initialVariants)
-      
+
       // Find matching variant based on initial selections
       const matchingVariant = variants?.find((variant) => {
         return variant.options.every((option) => {
-          const optionGroup = optionGroups?.find((og) => og.id === option.groupId)
-          const optionValue = optionGroup?.options.find((o) => o.id === option.id)
+          const optionGroup = optionGroups?.find(
+            (og) => og.id === option.groupId
+          )
+          const optionValue = optionGroup?.options.find(
+            (o) => o.id === option.id
+          )
           return (
             initialVariants[optionGroup?.name.toLowerCase() || ""] ===
             optionValue?.name
           )
         })
       })
-      
+
       if (matchingVariant) {
         setSelectedVariant(matchingVariant)
       }
@@ -117,11 +129,11 @@ export default function ProductIntro({ product }: Props) {
   // Update URL when selections change
   const updateURL = (newVariants: Record<string, string>) => {
     const params = new URLSearchParams(searchParams.toString())
-    
+
     Object.entries(newVariants).forEach(([key, value]) => {
       params.set(key, value)
     })
-    
+
     router.replace(`?${params.toString()}`, { scroll: false })
   }
 
@@ -159,17 +171,64 @@ export default function ProductIntro({ product }: Props) {
 
   // HANDLE CHANGE CART
   const handleCartAmountChange = (amount: number) => () => {
+    const cartItem = {
+      price: selectedVariant?.priceWithTax || price,
+      qty: amount,
+      name: name || "Product",
+      imgUrl: thumbnail,
+      id: selectedVariant?.id || id,
+      slug,
+    }
+
     dispatch({
       type: "CHANGE_CART_AMOUNT",
-      payload: {
-        price: selectedVariant?.priceWithTax || price,
-        qty: amount,
-        name: name || "Product",
-        imgUrl: thumbnail,
-        id,
-        slug,
-      },
+      payload: cartItem,
     })
+
+    // Show toast notification when adding to cart
+    if (amount > 0) {
+      showToast(`${t("Added to Cart")}: ${name || "Product"}`, 2500)
+    }
+  }
+
+  // HANDLE ADD TO CART WITH QUANTITY
+  const handleAddToCart = () => {
+    const cartItem = {
+      price: selectedVariant?.priceWithTax || price,
+      qty: quantity,
+      name: name || "Product",
+      imgUrl: thumbnail,
+      id: selectedVariant?.id || id,
+      slug,
+    }
+
+    dispatch({
+      type: "CHANGE_CART_AMOUNT",
+      payload: cartItem,
+    })
+
+    showToast(`${t("Added to Cart")}: ${name || "Product"} (${quantity})`, 2500)
+  }
+
+  // HANDLE BUY NOW - PROCEED TO CHECKOUT
+  const handleBuyNow = () => {
+    const cartItem = {
+      price: selectedVariant?.priceWithTax || price,
+      qty: quantity,
+      name: name || "Product",
+      imgUrl: thumbnail,
+      id: selectedVariant?.id || id,
+      slug,
+    }
+
+    // Add to cart first
+    dispatch({
+      type: "CHANGE_CART_AMOUNT",
+      payload: cartItem,
+    })
+
+    // Then redirect to checkout
+    router.push("/checkout")
   }
 
   return (
@@ -323,49 +382,60 @@ export default function ProductIntro({ product }: Props) {
             </Box>
           </Box>
 
-          {/* ADD TO CART BUTTON */}
-          {!cartItem?.qty ? (
-            <Button
-              color="primary"
-              variant="contained"
-              onClick={handleCartAmountChange(1)}
-              sx={{
-                mb: 4.5,
-                px: "1.75rem",
-                height: 48,
-                fontSize: "16px",
-                fontWeight: 600,
-              }}
-            >
-              {t("Add to Cart")}
-            </Button>
-          ) : (
-            <FlexBox alignItems="center" mb={4.5}>
+          {/* QUANTITY AND ACTION BUTTONS */}
+          <Box mb={4.5}>
+            {/* QUANTITY STEPPER */}
+            <Box mb={3}>
+              <H6 mb={2} fontWeight={600}>
+                {t("Quantity")}
+              </H6>
+              <QuantityStepper
+                quantity={quantity}
+                onQuantityChange={setQuantity}
+                min={1}
+                max={99}
+                disabled={stockLevel === "OUT_OF_STOCK"}
+              />
+            </Box>
+
+            {/* ACTION BUTTONS */}
+
+            <FlexBox gap={2} flexWrap="wrap">
               <Button
-                size="small"
-                sx={{ p: 1 }}
                 color="primary"
-                variant="outlined"
-                onClick={handleCartAmountChange(cartItem?.qty - 1)}
+                variant="contained"
+                onClick={handleBuyNow}
+                disabled={stockLevel === "OUT_OF_STOCK"}
+                sx={{
+                  px: "1.75rem",
+                  height: 48,
+                  fontSize: "16px",
+                  fontWeight: 600,
+                  flex: 1,
+                  minWidth: 140,
+                }}
               >
-                <Remove fontSize="small" />
+                {t("Buy Now")}
               </Button>
 
-              <H3 fontWeight="600" mx={2.5}>
-                {cartItem?.qty.toString().padStart(2, "0")}
-              </H3>
-
               <Button
-                size="small"
-                sx={{ p: 1 }}
                 color="primary"
                 variant="outlined"
-                onClick={handleCartAmountChange(cartItem?.qty + 1)}
+                onClick={handleAddToCart}
+                disabled={stockLevel === "OUT_OF_STOCK"}
+                sx={{
+                  px: "1.75rem",
+                  height: 48,
+                  fontSize: "16px",
+                  fontWeight: 600,
+                  flex: 1,
+                  minWidth: 140,
+                }}
               >
-                <Add fontSize="small" />
+                {t("Add to Cart")}
               </Button>
             </FlexBox>
-          )}
+          </Box>
         </Grid>
       </Grid>
     </Box>

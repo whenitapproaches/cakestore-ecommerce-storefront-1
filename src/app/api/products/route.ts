@@ -88,13 +88,22 @@ export async function GET(req: NextRequest) {
 
     console.log(products.customSearch)
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       items: products.customSearch.items,
       total: products.customSearch.totalItems,
       page,
       limit,
       totalPages: Math.ceil(products.customSearch.totalItems / limit),
     })
+
+    // Set cache headers for products API
+    response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600') // 5 minutes cache, 10 minutes stale-while-revalidate
+    response.headers.set('ETag', `products-${Date.now()}`) // Simple ETag for cache validation
+    
+    // Add cache tags for better invalidation
+    response.headers.set('x-cache-tags', 'products,product-list')
+
+    return response
   } catch (error) {
     console.error("API Error:", error.errors[0])
     return NextResponse.json(

@@ -10,6 +10,8 @@ import ThemeProvider from "theme/theme-provider";
 import CartProvider from "contexts/CartContext";
 // SITE SETTINGS PROVIDER
 import SettingsProvider from "contexts/SettingContext";
+// TOAST NOTIFICATION PROVIDER
+import { ToastProvider } from "contexts/ToastContext";
 // GLOBAL CUSTOM COMPONENTS
 import RTL from "components/rtl";
 import ProgressBar from "components/progress";
@@ -24,8 +26,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <CartProvider>
           <SettingsProvider>
             <ThemeProvider>
-              <ProgressBar />
-              <RTL>{children}</RTL>
+              <ToastProvider>
+                <ProgressBar />
+                <RTL>{children}</RTL>
+              </ToastProvider>
             </ThemeProvider>
           </SettingsProvider>
         </CartProvider>
