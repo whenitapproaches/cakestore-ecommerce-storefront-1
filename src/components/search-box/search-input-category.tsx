@@ -1,5 +1,7 @@
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
+import IconButton from "@mui/material/IconButton";
+import CloseIcon from "@mui/icons-material/Close";
 // LOCAL CUSTOM COMPONENTS
 import SearchResult from "./components/search-result";
 import { useTranslation } from "react-i18next";
@@ -9,7 +11,7 @@ import useSearch from "./hooks/use-search";
 import Search from "icons/Search";
 
 export default function SearchInputWithCategory() {
-  const { parentRef, resultList, handleSearch } = useSearch();
+  const { parentRef, resultList, handleSearch, searchText, clearSearch } = useSearch();
   const { t } = useTranslation();
 
   const INPUT_PROPS = {
@@ -41,12 +43,24 @@ export default function SearchInputWithCategory() {
         fullWidth
         variant="outlined"
         placeholder={`${t("Search")}...`}
+        value={searchText}
         onChange={handleSearch}
-        InputProps={INPUT_PROPS}
+        InputProps={{
+          ...INPUT_PROPS,
+          endAdornment: (
+            <Box display="flex" alignItems="center">
+              {searchText ? (
+                <IconButton size="small" onClick={clearSearch} sx={{ mr: 0.5 }}>
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+              ) : null}
+            </Box>
+          ),
+        }}
       />
 
       {/* SHOW SEARCH RESULT LIST */}
-      {resultList.length > 0 ? <SearchResult results={resultList} /> : null}
+      {resultList.length > 0 ? <SearchResult results={resultList} search={searchText} /> : null}
     </Box>
   );
 }

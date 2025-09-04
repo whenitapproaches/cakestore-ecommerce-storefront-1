@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
 
     // Add search term if provided
     if (search) {
-      searchInput.search = search
+      searchInput.term = search
     }
 
     // Add filters if provided
@@ -65,7 +65,7 @@ export async function GET(req: NextRequest) {
       searchInput.filters = filters
     }
 
-    console.log(sortBy)
+    console.log(searchInput)
 
     const products = await api({
       customSearch: [
@@ -85,8 +85,6 @@ export async function GET(req: NextRequest) {
         { items: ProductSearchResultSelector, totalItems: true },
       ],
     })
-
-    console.log(products.customSearch)
 
     const response = NextResponse.json({
       items: products.customSearch.items,
