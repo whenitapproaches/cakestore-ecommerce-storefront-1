@@ -11,7 +11,7 @@ import BottomActions from "./components/bottom-actions";
 // GLOBAL CUSTOM COMPONENT
 import Scrollbar from "components/scrollbar";
 // CUSTOM UTILS LIBRARY FUNCTION
-import { currency } from "lib";
+import { currency, formatCurrency } from "lib";
 // CUSTOM DATA MODEL
 import { CartItem } from "contexts/CartContext";
 
@@ -21,12 +21,22 @@ type Props = { toggleSidenav: () => void };
 
 export default function MiniCart({ toggleSidenav }: Props) {
   const { push } = useRouter();
-  const { state, dispatch } = useCart();
+  const { state, dispatch, updateItemQuantity, removeFromCart } = useCart();
   const cartList = state.cart;
 
-  const handleCartAmountChange = (amount: number, product: CartItem) => () => {
-    dispatch({ type: "CHANGE_CART_AMOUNT", payload: { ...product, qty: amount } });
-  };
+  const handleIncrease = async (product: CartItem) => {
+    const nextQty = product.qty + 1
+    await updateItemQuantity(product.id, nextQty)
+  }
+
+  const handleDecrease = async (product: CartItem) => {
+    const nextQty = Math.max(1, product.qty - 1)
+    await updateItemQuantity(product.id, nextQty)
+  }
+
+  const handleRemove = async (product: CartItem) => {
+    await removeFromCart({ id: product.id, orderLineId: product.orderLineId })
+  }
 
   const getTotalPrice = () => {
     return cartList.reduce((acc, item) => acc + item.price * item.qty, 0);
@@ -52,7 +62,9 @@ export default function MiniCart({ toggleSidenav }: Props) {
               <MiniCartItem
                 item={item}
                 key={item.id}
-                handleCartAmountChange={handleCartAmountChange}
+                handleIncrease={handleIncrease}
+                handleDecrease={handleDecrease}
+                handleRemove={handleRemove}
               />
             ))}
           </Scrollbar>
@@ -63,7 +75,7 @@ export default function MiniCart({ toggleSidenav }: Props) {
 
       {/* CART BOTTOM ACTION BUTTONS */}
       {cartList.length > 0 ? (
-        <BottomActions total={currency(getTotalPrice())} handleNavigate={handleNavigate} />
+        <BottomActions total={formatCurrency(getTotalPrice())} handleNavigate={handleNavigate} />
       ) : null}
     </Box>
   );

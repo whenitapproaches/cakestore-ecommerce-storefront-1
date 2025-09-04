@@ -28,10 +28,12 @@ const useCart = () => {
         if (res.ok && data?.cart?.lines) {
           const mapped = data.cart.lines.map((l: any) => ({
             id: l?.productVariant?.id ?? l?.id,
+            orderLineId: l?.id ?? undefined,
             qty: l?.quantity ?? 0,
             price: l?.unitPriceWithTax ?? 0,
             name: l?.productVariant?.name ?? "",
             imgUrl:
+              l?.featuredAsset?.preview ??
               l?.productVariant?.featuredAsset?.preview ??
               l?.productVariant?.featuredAsset?.source,
             slug: l?.productVariant?.product?.slug ?? "",
@@ -47,7 +49,7 @@ const useCart = () => {
       if (!synced) {
         const existing = state.cart.find((item) => item.id === cartItem.id)
         const nextItem = existing
-          ? { ...cartItem, qty: existing.qty + qtyToAdd }
+          ? { ...existing, qty: (existing.qty || 0) + qtyToAdd }
           : { ...cartItem, qty: qtyToAdd }
         dispatch({ type: "CHANGE_CART_AMOUNT", payload: nextItem })
       }
@@ -62,16 +64,34 @@ const useCart = () => {
 
   // Remove item from cart
   const removeFromCart = useCallback(
-    (itemId: string | number) => {
+    async (item: { id: string | number; orderLineId?: string }) => {
+      try {
+        if (item.orderLineId) {
+          const res = await fetch(`/api/cart?orderLineId=${encodeURIComponent(String(item.orderLineId))}`,
+            { method: "DELETE", credentials: "include" })
+          const data = await res.json()
+          if (res.ok && data?.cart?.lines) {
+            const mapped = data.cart.lines.map((l: any) => ({
+              id: l?.productVariant?.id ?? l?.id,
+              orderLineId: l?.id ?? undefined,
+              qty: l?.quantity ?? 0,
+              price: l?.unitPriceWithTax ?? 0,
+              name: l?.productVariant?.name ?? "",
+              imgUrl:
+                l?.featuredAsset?.preview ??
+                l?.productVariant?.featuredAsset?.preview ??
+                l?.productVariant?.featuredAsset?.source,
+              slug: l?.productVariant?.product?.slug ?? "",
+            }))
+            dispatch({ type: "SET_CART", payload: mapped })
+            return
+          }
+        }
+      } catch {}
+      // fallback - remove locally if API fails
       dispatch({
         type: "CHANGE_CART_AMOUNT",
-        payload: {
-          id: itemId,
-          qty: 0, // Setting qty to 0 will remove the item
-          name: "",
-          slug: "",
-          price: 0,
-        },
+        payload: { id: item.id, qty: 0, name: "", slug: "", price: 0 },
       })
     },
     [dispatch]
@@ -79,17 +99,43 @@ const useCart = () => {
 
   // Update item quantity
   const updateItemQuantity = useCallback(
-    (itemId: string | number, quantity: number) => {
+    async (itemId: string | number, quantity: number) => {
       const existingItem = state.cart.find((item) => item.id === itemId)
-      if (existingItem) {
-        dispatch({
-          type: "CHANGE_CART_AMOUNT",
-          payload: {
-            ...existingItem,
-            qty: quantity,
-          },
-        })
-      }
+      if (!existingItem) return
+
+      try {
+        if (existingItem.orderLineId) {
+          const res = await fetch(`/api/cart`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ orderLineId: String(existingItem.orderLineId), quantity }),
+          })
+          const data = await res.json()
+          if (res.ok && data?.cart?.lines) {
+            const mapped = data.cart.lines.map((l: any) => ({
+              id: l?.productVariant?.id ?? l?.id,
+              orderLineId: l?.id ?? undefined,
+              qty: l?.quantity ?? 0,
+              price: l?.unitPriceWithTax ?? 0,
+              name: l?.productVariant?.name ?? "",
+              imgUrl:
+                l?.featuredAsset?.preview ??
+                l?.productVariant?.featuredAsset?.preview ??
+                l?.productVariant?.featuredAsset?.source,
+              slug: l?.productVariant?.product?.slug ?? "",
+            }))
+            dispatch({ type: "SET_CART", payload: mapped })
+            return
+          }
+        }
+      } catch {}
+
+      // fallback local update
+      dispatch({
+        type: "CHANGE_CART_AMOUNT",
+        payload: { ...existingItem, qty: quantity },
+      })
     },
     [state.cart, dispatch]
   )

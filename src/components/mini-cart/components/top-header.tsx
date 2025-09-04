@@ -20,7 +20,7 @@ export default function TopHeader({ toggle, total }: Props) {
         <CartBag color="inherit" />
 
         <Paragraph lineHeight={0} fontWeight={600}>
-          {total} item
+          {total} {total > 1 ? "items" : "item"}
         </Paragraph>
       </FlexBox>
 

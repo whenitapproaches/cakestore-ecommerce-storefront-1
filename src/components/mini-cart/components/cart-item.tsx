@@ -11,18 +11,20 @@ import Remove from "@mui/icons-material/Remove";
 import { FlexBox } from "components/flex-box";
 import { H6, Tiny } from "components/Typography";
 // CUSTOM UTILS LIBRARY FUNCTION
-import { currency } from "lib";
+import { currency, formatCurrency } from "lib";
 // CUSTOM DATA MODEL
 import { CartItem } from "contexts/CartContext";
 
 // ==============================================================
 interface Props {
   item: CartItem;
-  handleCartAmountChange: (amount: number, product: CartItem) => () => void;
+  handleIncrease: (item: CartItem) => void;
+  handleDecrease: (item: CartItem) => void;
+  handleRemove: (item: CartItem) => void;
 }
 // ==============================================================
 
-export default function MiniCartItem({ item, handleCartAmountChange }: Props) {
+export default function MiniCartItem({ item, handleIncrease, handleDecrease, handleRemove }: Props) {
   return (
     <FlexBox
       py={2}
@@ -36,7 +38,7 @@ export default function MiniCartItem({ item, handleCartAmountChange }: Props) {
           size="small"
           color="primary"
           variant="outlined"
-          onClick={handleCartAmountChange(item.qty + 1, item)}
+          onClick={() => handleIncrease(item)}
           sx={{ height: 28, width: 28, borderRadius: 50 }}>
           <Add fontSize="small" />
         </Button>
@@ -48,13 +50,13 @@ export default function MiniCartItem({ item, handleCartAmountChange }: Props) {
           color="primary"
           variant="outlined"
           disabled={item.qty === 1}
-          onClick={handleCartAmountChange(item.qty - 1, item)}
+          onClick={() => handleDecrease(item)}
           sx={{ height: 28, width: 28, borderRadius: 50 }}>
           <Remove fontSize="small" />
         </Button>
       </FlexBox>
 
-      <Link href={`/products/${item.id}`}>
+      <Link href={`/products/${item.slug}`}>
         <Avatar alt={item.name} src={item.imgUrl} sx={{ mx: 1, width: 75, height: 75 }} />
       </Link>
 
@@ -66,15 +68,15 @@ export default function MiniCartItem({ item, handleCartAmountChange }: Props) {
         </Link>
 
         <Tiny color="grey.600">
-          {currency(item.price)} x {item.qty}
+          {formatCurrency(item.price)} x {item.qty}
         </Tiny>
 
         <H6 color="primary.main" mt={0.5}>
-          {currency(item.qty * item.price)}
+          {formatCurrency(item.qty * item.price)}
         </H6>
       </Box>
 
-      <IconButton size="small" onClick={handleCartAmountChange(0, item)} sx={{ marginLeft: 2.5 }}>
+      <IconButton size="small" onClick={() => handleRemove(item)} sx={{ marginLeft: 2.5 }}>
         <Close fontSize="small" />
       </IconButton>
     </FlexBox>

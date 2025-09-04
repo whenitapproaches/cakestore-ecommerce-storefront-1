@@ -25,6 +25,12 @@ export const resources = {
       Price: "Giá",
       "cancel": "hủy",
       "This Product Has No Description": "Sản phẩm này không có mô tả",
+      "item": "món",
+      "items": "món",
+      "Your shopping bag is empty": "Giỏ hàng của bạn trống",
+      "Checkout Now": "Đặt hàng ngay",
+      "View Cart": "Xem giỏ hàng",
+      "Searching for": "Tìm kiếm",
     },
     common: {
       homepage: "Tiệm bánh",

@@ -20,10 +20,10 @@ export async function GET(req: NextRequest) {
     const brand = searchParams.get("brand")?.split(",") || []
     const color = searchParams.get("color")?.split(",") || []
     const sales = searchParams.get("sales")?.split(",") || []
-    const priceRange = searchParams
-      .get("price")
-      ?.split(",")
-      .map((p) => parseFloat(p)) || [0, 300]
+    const priceParam = searchParams.get("price")
+    const priceParts = priceParam
+      ? priceParam.split(",").map((p) => parseFloat(p))
+      : []
     const rating = parseInt(searchParams.get("rating") || "0")
 
     // Calculate skip for pagination
@@ -56,16 +56,18 @@ export async function GET(req: NextRequest) {
     if (brand.length > 0) filters.brand = brand
     if (color.length > 0) filters.color = color
     if (sales.length > 0) filters.sales = sales
-    if (priceRange[0] > 0 || priceRange[1] < 300) {
-      filters.priceRange = { min: priceRange[0], max: priceRange[1] }
+    // Map price to CustomSearchInput fields
+    if (priceParts.length === 2) {
+      searchInput.priceMin = priceParts[0] * Math.pow(10, 2)
+      searchInput.priceMax = priceParts[1] * Math.pow(10, 2)
+    } else if (priceParts.length === 1) {
+      searchInput.priceMin = priceParts[0] * Math.pow(10, 2)
     }
     if (rating > 0) filters.rating = rating
 
     if (Object.keys(filters).length > 0) {
       searchInput.filters = filters
     }
-
-    console.log(searchInput)
 
     const products = await api({
       customSearch: [

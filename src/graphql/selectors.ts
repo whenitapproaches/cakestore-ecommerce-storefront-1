@@ -674,3 +674,10 @@ export const ProductVariantPreviewSelector = Selector("ProductVariantPreview")({
     stockOnHand: true,
   },
 })
+
+export const StoreSettingsSelector = Selector("StoreSettings")({
+  id: true,
+  key: true,
+  value: true,
+  createdAt: true,
+})

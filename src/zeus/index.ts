@@ -1101,6 +1101,10 @@ query will once again return `null`. */
     customSearch?: [
       { input: ValueTypes["CustomSearchInput"] | Variable<any, string> },
       ValueTypes["SearchResponse"],
+    ],
+    storeSettings?: [
+      { keys?: string[] },
+      ValueTypes["StoreSettingsList"],
     ]
   }>
   ["Mutation"]: AliasType<{
@@ -1954,6 +1958,9 @@ by FacetValue ID. Examples:
     priceMin?: number | undefined | null | Variable<any, string>
     priceMax?: number | undefined | null | Variable<any, string>
   }
+  ["StoreSettingsListInput"]: {
+    keys: string | Variable<any, string>
+  }
   ["SearchResultSortParameter"]: {
     name?: ValueTypes["SortOrder"] | undefined | null | Variable<any, string>
     price?: ValueTypes["SortOrder"] | undefined | null | Variable<any, string>
@@ -2763,6 +2770,11 @@ and refund calculations. */
     totalItems?: boolean | `@${string}`
     facetValues?: ValueTypes["FacetValueResult"]
     collections?: ValueTypes["CollectionResult"]
+    __typename?: boolean | `@${string}`
+  }>
+  ["StoreSettingsList"]: AliasType<{
+    items?: ValueTypes["StoreSettings"]
+    totalItems?: boolean | `@${string}`
     __typename?: boolean | `@${string}`
   }>
   /** Which FacetValues are present in the products returned
@@ -4088,6 +4100,10 @@ query will once again return `null`. */
       ResolverInputTypes["SearchResponse"],
     ]
     __typename?: boolean | `@${string}`
+    storeSettings?: [
+      { input?: ResolverInputTypes["StoreSettingsListInput"] | undefined | null },
+      ResolverInputTypes["StoreSettingsList"],
+    ]
   }>
   ["Mutation"]: AliasType<{
     addItemToOrder?: [
@@ -4954,6 +4970,9 @@ by FacetValue ID. Examples:
     priceMin?: number | undefined | null
     priceMax?: number | undefined | null
     sort?: ResolverInputTypes["SearchResultSortParameter"] | undefined | null
+  }
+  ["StoreSettingsListInput"]: {
+    keys: string | Variable<any, string>
   }
   ["SearchResultSortParameter"]: {
     name?: ResolverInputTypes["SortOrder"] | undefined | null
@@ -6583,6 +6602,7 @@ general anonymous access to Order data. */
     search: ModelTypes["SearchResponse"]
     /** Search Products based on the criteria set by the `CustomSearchInput` */
     customSearch: ModelTypes["SearchResponse"]
+    storeSettings: ModelTypes["StoreSettingsList"]
   }
   ["Mutation"]: {
     /** Adds an item to the order. If custom fields are defined on the OrderLine entity, a third argument 'customFields' will be available. */
@@ -7731,6 +7751,10 @@ and refund calculations. */
     facetValues: Array<ModelTypes["FacetValueResult"]>
     collections: Array<ModelTypes["CollectionResult"]>
   }
+  ["StoreSettingsList"]: {
+    items: Array<ModelTypes["StoreSettings"]>
+    totalItems: number
+  }
   /** Which FacetValues are present in the products returned
 by the search, and in what quantity. */
   ["FacetValueResult"]: {
@@ -8482,6 +8506,7 @@ general anonymous access to Order data. */
     search: GraphQLTypes["SearchResponse"]
     /** Search Products based on the criteria set by the `CustomSearchInput` */
     customSearch: GraphQLTypes["SearchResponse"]
+    storeSettings: GraphQLTypes["StoreSettingsList"]
   }
   ["Mutation"]: {
     __typename: "Mutation"
@@ -9944,6 +9969,10 @@ and refund calculations. */
     totalItems: number
     facetValues: Array<GraphQLTypes["FacetValueResult"]>
     collections: Array<GraphQLTypes["CollectionResult"]>
+  }
+  ["StoreSettingsList"]: {
+    items: Array<GraphQLTypes["StoreSettings"]>
+    totalItems: number
   }
   /** Which FacetValues are present in the products returned
 by the search, and in what quantity. */

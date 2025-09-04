@@ -1,6 +1,7 @@
 import Link from "next/link"
 import Rating from "@mui/material/Rating"
 import IconButton from "@mui/material/IconButton"
+import CircularProgress from "@mui/material/CircularProgress"
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart"
 // GLOBAL CUSTOM COMPONENTS
 import { H6 } from "components/Typography"
@@ -38,28 +39,39 @@ export default function ProductCard16({ product }: Props) {
 
   const { addToCart } = useCart()
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [isAddingToCart, setIsAddingToCart] = useState(false)
   const [productDetail, setProductDetail] = useState<any>(null)
   const closeDialog = useCallback(() => setDialogOpen(false), [])
-  const onConfirmVariant = useCallback((variantId: string) => {
+  const onConfirmVariant = useCallback(async (variantId: string) => {
     closeDialog()
     const variant = productDetail?.variants?.find((v: any) => String(v.id) === String(variantId))
-    addToCart({ id: String(variantId), slug, price: variant?.priceWithTax ?? price, name: title, imgUrl: thumbnail, qty: 1 })
+    setIsAddingToCart(true)
+    try {
+      await addToCart({ id: String(variantId), slug, price: variant?.priceWithTax ?? price, name: title, imgUrl: thumbnail, qty: 1 })
+    } finally {
+      setIsAddingToCart(false)
+    }
   }, [addToCart, closeDialog, productDetail, slug, price, title, thumbnail])
   const handleAddToCart = async () => {
     try {
+      setIsAddingToCart(true)
       const { data } = await axios.get(`/api/products/${slug}`)
       const product = data?.product
       const pv = product?.variants || []
       if (pv.length === 1) {
-        addToCart({ id: String(pv[0].id), slug, price: pv[0].priceWithTax ?? price, name: title, imgUrl: thumbnail, qty: 1 })
+        await addToCart({ id: String(pv[0].id), slug, price: pv[0].priceWithTax ?? price, name: title, imgUrl: thumbnail, qty: 1 })
+        setIsAddingToCart(false)
         return
       }
       if (pv.length > 1) {
         setProductDetail(product)
+        setIsAddingToCart(false)
         setDialogOpen(true)
       }
     } catch (e) {
       // ignore
+    } finally {
+      setIsAddingToCart(false)
     }
   }
 
@@ -107,8 +119,12 @@ export default function ProductCard16({ product }: Props) {
           </PriceText>
         </FlexBox>
 
-        <IconButton color="primary" onClick={handleAddToCart}>
-          <AddShoppingCartIcon fontSize="small" />
+        <IconButton color="primary" onClick={handleAddToCart} disabled={isAddingToCart}>
+          {isAddingToCart ? (
+            <CircularProgress size={18} thickness={5} color="inherit" />
+          ) : (
+            <AddShoppingCartIcon fontSize="small" />
+          )}
         </IconButton>
       </FlexBox>
       <VariantConfigDialog open={dialogOpen} product={productDetail} onClose={closeDialog} onConfirm={onConfirmVariant} />

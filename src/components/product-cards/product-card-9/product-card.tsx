@@ -14,6 +14,7 @@ import ProductPrice from "../product-price"
 import ProductTags from "./components/tags"
 import IconButton from "@mui/material/IconButton"
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart"
+import CircularProgress from "@mui/material/CircularProgress"
 import FavoriteButton from "./components/favorite-button"
 import Product from "models/Product.model"
 import { useMemo, useState, useCallback } from "react"
@@ -77,35 +78,46 @@ export default function ProductCard9({ product }: Props) {
   const { isFavorite, toggleFavorite } = useProduct(slug)
   const { addToCart } = useCart()
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [isAddingToCart, setIsAddingToCart] = useState(false)
   const [productDetail, setProductDetail] = useState<any>(null)
   const closeDialog = useCallback(() => setDialogOpen(false), [])
-  const onConfirmVariant = useCallback((variantId: string) => {
+  const onConfirmVariant = useCallback(async (variantId: string) => {
     closeDialog()
     const variant = productDetail?.variants?.find((v: any) => String(v.id) === String(variantId))
-    addToCart({
-      id: variantId,
-      slug,
-      price: variant?.priceWithTax ?? price,
-      imgUrl: thumbnail,
-      name: title,
-      qty: 1,
-    })
+    setIsAddingToCart(true)
+    try {
+      await addToCart({
+        id: variantId,
+        slug,
+        price: variant?.priceWithTax ?? price,
+        imgUrl: thumbnail,
+        name: title,
+        qty: 1,
+      })
+    } finally {
+      setIsAddingToCart(false)
+    }
   }, [addToCart, closeDialog, productDetail, slug, price, thumbnail, title])
   const handleAddToCart = async () => {
     try {
+      setIsAddingToCart(true)
       const { data } = await axios.get(`/api/products/${slug}`)
       const product = data?.product
       const pv = product?.variants || []
       if (pv.length === 1) {
-        addToCart({ id: String(pv[0].id), slug, price: pv[0].priceWithTax ?? price, imgUrl: thumbnail, name: title, qty: 1 })
+        await addToCart({ id: String(pv[0].id), slug, price: pv[0].priceWithTax ?? price, imgUrl: thumbnail, name: title, qty: 1 })
+        setIsAddingToCart(false)
         return
       }
       if (pv.length > 1) {
         setProductDetail(product)
+        setIsAddingToCart(false)
         setDialogOpen(true)
       }
     } catch (e) {
       // fallback: do nothing
+    } finally {
+      setIsAddingToCart(false)
     }
   }
 
@@ -138,8 +150,12 @@ export default function ProductCard9({ product }: Props) {
             <DiscountChip discount={discount} />
           </div>
 
-          <IconButton color="primary" onClick={handleAddToCart}>
-            <AddShoppingCartIcon fontSize="small" />
+          <IconButton color="primary" onClick={handleAddToCart} disabled={isAddingToCart}>
+            {isAddingToCart ? (
+              <CircularProgress size={18} thickness={5} color="inherit" />
+            ) : (
+              <AddShoppingCartIcon fontSize="small" />
+            )}
           </IconButton>
         </div>
       </ContentWrapper>

@@ -8,6 +8,7 @@ import Chip from "@mui/material/Chip"
 import Grid from "@mui/material/Grid"
 import Avatar from "@mui/material/Avatar"
 import Button from "@mui/material/Button"
+import CircularProgress from "@mui/material/CircularProgress"
 // MUI ICON COMPONENTS
 import Add from "@mui/icons-material/Add"
 import Remove from "@mui/icons-material/Remove"
@@ -77,6 +78,7 @@ export default function ProductIntro({ product }: Props) {
     {}
   )
   const [quantity, setQuantity] = useState(1)
+  const [isAddingToCart, setIsAddingToCart] = useState(false)
 
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -192,14 +194,20 @@ export default function ProductIntro({ product }: Props) {
 
   // HANDLE ADD TO CART WITH QUANTITY
   const handleAddToCart = () => {
-    addToCart({
-      price: selectedVariant?.priceWithTax || price,
-      qty: quantity,
-      name: name || "Product",
-      imgUrl: thumbnail,
-      id: selectedVariant?.id || id,
-      slug,
-    })
+    if (isAddingToCart) return
+    setIsAddingToCart(true)
+    Promise.resolve(
+      addToCart({
+        price: selectedVariant?.priceWithTax || price,
+        qty: quantity,
+        name: name || "Product",
+        imgUrl: thumbnail,
+        id: selectedVariant?.id || id,
+        slug,
+      })
+    )
+      .catch(() => {})
+      .finally(() => setIsAddingToCart(false))
   }
 
   // HANDLE BUY NOW - PROCEED TO CHECKOUT
@@ -414,7 +422,7 @@ export default function ProductIntro({ product }: Props) {
                 color="primary"
                 variant="outlined"
                 onClick={handleAddToCart}
-                disabled={stockLevel === "OUT_OF_STOCK"}
+                disabled={stockLevel === "OUT_OF_STOCK" || isAddingToCart}
                 sx={{
                   px: "1.75rem",
                   height: 48,
@@ -424,7 +432,11 @@ export default function ProductIntro({ product }: Props) {
                   minWidth: 140,
                 }}
               >
-                {t("Add to Cart")}
+                {isAddingToCart ? (
+                  <CircularProgress size={22} thickness={5} color="inherit" />
+                ) : (
+                  t("Add to Cart")
+                )}
               </Button>
             </FlexBox>
           </Box>

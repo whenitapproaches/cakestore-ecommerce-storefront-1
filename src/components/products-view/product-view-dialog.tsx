@@ -1,7 +1,9 @@
 import Grid from "@mui/material/Grid";
+import { useState } from "react";
 import Rating from "@mui/material/Rating";
 import Dialog from "@mui/material/Dialog";
 import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import DialogContent from "@mui/material/DialogContent";
@@ -30,19 +32,37 @@ interface Props {
 export default function ProductViewDialog(props: Props) {
   const { product, openDialog, handleCloseDialog } = props;
 
-  const { state, dispatch } = useCart();
+  const { state, dispatch, addToCart } = useCart();
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
   const cartItem = state.cart.find((item) => item.id === product.id);
 
   const handleCartAmountChange = (amount: number) => () => {
-    dispatch({
-      type: "CHANGE_CART_AMOUNT",
-      payload: {
-        ...product,
-        qty: amount,
+    if (amount <= 0) {
+      dispatch({
+        type: "CHANGE_CART_AMOUNT",
+        payload: {
+          ...product,
+          qty: 0,
+          name: product.title,
+          imgUrl: product.imgGroup[0]
+        }
+      });
+      return;
+    }
+
+    setIsAddingToCart(true);
+    Promise.resolve(
+      addToCart({
+        id: product.id,
+        slug: product.slug,
+        price: product.price,
+        imgUrl: product.imgGroup[0],
         name: product.title,
-        imgUrl: product.imgGroup[0]
-      }
-    });
+        qty: amount
+      })
+    )
+      .catch(() => {})
+      .finally(() => setIsAddingToCart(false));
   };
 
   return (
@@ -101,8 +121,13 @@ export default function ProductViewDialog(props: Props) {
                   color="dark"
                   variant="contained"
                   onClick={handleCartAmountChange(1)}
+                  disabled={!!isAddingToCart}
                   sx={{ height: 45, borderRadius: 2 }}>
-                  Add to Cart
+                  {isAddingToCart ? (
+                    <CircularProgress size={18} thickness={5} color="inherit" />
+                  ) : (
+                    "Add to Cart"
+                  )}
                 </Button>
               ) : (
                 <FlexBox alignItems="center">

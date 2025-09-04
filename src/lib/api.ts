@@ -253,6 +253,14 @@ export const ordersApi = {
   delete: (id: string) => api.delete(`/api/orders/${id}`),
 }
 
+export const storeSettingsApi = {
+  // Get store settings by keys (comma or pipe-separated)
+  getByKeys: (keys: string | string[]) => {
+    const keysParam = Array.isArray(keys) ? keys.join("|") : keys
+    return api.get('/api/store-settings', { keys: keysParam })
+  },
+}
+
 export const authApi = {
   // Login
   login: (credentials: { email: string; password: string }) => 

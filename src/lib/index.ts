@@ -60,7 +60,7 @@ const formatter = new Intl.NumberFormat('vi-VN', {
   minimumFractionDigits: 0,
   maximumFractionDigits: 0,
 })
-export const formatCurrency = (price: number) => formatter.format(price / Math.pow(10, 2));
+export const formatCurrency = (price: number, fractionNotIncluded = false) => formatter.format(price / Math.pow(10, fractionNotIncluded ? 0 : 2));
 
 // Export all API utilities (excluding useApi to avoid conflicts)
 export { 

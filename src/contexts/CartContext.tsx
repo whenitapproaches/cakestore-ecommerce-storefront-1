@@ -12,6 +12,8 @@ export type CartItem = {
   price: number
   imgUrl?: string
   id: string | number
+  options?: Record<string, string>
+  orderLineId?: string
 }
 
 type CartActionType =
@@ -85,10 +87,12 @@ export default function CartProvider({ children }: PropsWithChildren) {
         const lines = data?.cart?.lines || []
         const mapped: CartItem[] = lines.map((l: any) => ({
           id: l?.productVariant?.id ?? l?.id,
+          orderLineId: l?.id ?? undefined,
           qty: l?.quantity ?? 0,
           price: l?.unitPriceWithTax ?? 0,
           name: l?.productVariant?.name ?? "",
           imgUrl:
+            l?.featuredAsset?.preview ??
             l?.productVariant?.featuredAsset?.preview ??
             l?.productVariant?.featuredAsset?.source,
           slug: l?.productVariant?.product?.slug ?? "",

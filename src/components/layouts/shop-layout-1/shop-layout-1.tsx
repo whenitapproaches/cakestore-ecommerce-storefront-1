@@ -32,7 +32,7 @@ export default function ShopLayout1({ children }: PropsWithChildren) {
       </Sticky>
 
       {/* NAVIGATION BAR */}
-      <Navbar elevation={0} border={1} />
+      <Navbar elevation={0} border={1} hideCategories />
 
       {/* BODY CONTENT */}
       {children}
