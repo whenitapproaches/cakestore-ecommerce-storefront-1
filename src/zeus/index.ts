@@ -2818,6 +2818,12 @@ by the search, and in what quantity. */
     price: boolean | `@${string}`
     listPrice: boolean | `@${string}`
     asset: ValueTypes["CustomSearchResultAsset"]
+    optionsCount: boolean | `@${string}`
+  }>
+  ["ProductVariantPreview"]: AliasType<{
+    productId: boolean | `@${string}`
+    available: boolean | `@${string}`
+    variants: ValueTypes["ProductVariant"]
   }>
   /** The price of a search result product, either as a range or as a single price */
   ["SearchResultPrice"]: AliasType<{

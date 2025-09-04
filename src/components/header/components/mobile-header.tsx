@@ -9,7 +9,6 @@ import Clear from "@mui/icons-material/Clear";
 // CUSTOM ICON COMPONENTS
 import Icon from "icons";
 // LOCAL CUSTOM COMPONENTS
-import DialogDrawer from "./dialog-drawer";
 // GLOBAL CUSTOM COMPONENTS
 import Image from "components/BazaarImage";
 import { Paragraph } from "components/Typography";
@@ -22,9 +21,9 @@ import useCart from "hooks/useCart";
 import useHeader from "../hooks/use-header";
 
 export default function MobileHeader() {
-  const { state } = useCart();
-  const { dialogOpen, sidenavOpen, searchBarOpen, toggleDialog, toggleSearchBar, toggleSidenav } =
-    useHeader();
+  const { getCartItemCount } = useCart();
+  const itemCount = getCartItemCount();
+  const { sidenavOpen, searchBarOpen, toggleSearchBar, toggleSidenav } = useHeader();
 
   const ICON_STYLE = { color: "grey.600", fontSize: 20 };
 
@@ -41,17 +40,13 @@ export default function MobileHeader() {
           <Image height={44} src="/assets/images/bazaar-black-sm.svg" alt="logo" />
         </Link>
 
-        {/* RIGHT CONTENT - LOGIN, CART, SEARCH BUTTON */}
+        {/* RIGHT CONTENT - CART, SEARCH BUTTON */}
         <FlexBox justifyContent="end" flex={1}>
           <IconButton onClick={toggleSearchBar}>
             <Icon.Search sx={ICON_STYLE} />
           </IconButton>
 
-          <IconButton onClick={toggleDialog}>
-            <Icon.User sx={ICON_STYLE} />
-          </IconButton>
-
-          <Badge badgeContent={state.cart.length} color="primary">
+          <Badge badgeContent={itemCount} color="primary">
             <IconButton onClick={toggleSidenav}>
               <Icon.CartBag sx={ICON_STYLE} />
             </IconButton>
@@ -75,13 +70,12 @@ export default function MobileHeader() {
         </Box>
       </Drawer>
 
-      {/* LOGIN FORM DIALOG AND CART SIDE BAR  */}
-      <DialogDrawer
-        dialogOpen={dialogOpen}
-        sidenavOpen={sidenavOpen}
-        toggleDialog={toggleDialog}
-        toggleSidenav={toggleSidenav}
-      />
+      {/* CART SIDE BAR ONLY */}
+      <Drawer open={sidenavOpen} anchor="right" onClose={toggleSidenav} sx={{ zIndex: 9999 }}>
+        <Box width={{ xs: 310, sm: 350 }}>
+          {/* The existing DialogDrawer used to host cart; use same MiniCart component if needed */}
+        </Box>
+      </Drawer>
     </Fragment>
   );
 }

@@ -70,7 +70,7 @@ export default function ProductIntro({ product }: Props) {
 
   const thumbnail = featuredAsset?.preview || images[0] || ""
 
-  const { state, dispatch } = useCart()
+  const { state, dispatch, addToCart } = useCart()
   const [selectedImage, setSelectedImage] = useState(0)
   const [selectedVariant, setSelectedVariant] = useState(firstVariant)
   const [selectVariants, setSelectVariants] = useState<Record<string, string>>(
@@ -185,7 +185,6 @@ export default function ProductIntro({ product }: Props) {
       payload: cartItem,
     })
 
-    // Show toast notification when adding to cart
     if (amount > 0) {
       showToast(`${t("Added to Cart")}: ${name || "Product"}`, 2500)
     }
@@ -193,21 +192,14 @@ export default function ProductIntro({ product }: Props) {
 
   // HANDLE ADD TO CART WITH QUANTITY
   const handleAddToCart = () => {
-    const cartItem = {
+    addToCart({
       price: selectedVariant?.priceWithTax || price,
       qty: quantity,
       name: name || "Product",
       imgUrl: thumbnail,
       id: selectedVariant?.id || id,
       slug,
-    }
-
-    dispatch({
-      type: "CHANGE_CART_AMOUNT",
-      payload: cartItem,
     })
-
-    showToast(`${t("Added to Cart")}: ${name || "Product"} (${quantity})`, 2500)
   }
 
   // HANDLE BUY NOW - PROCEED TO CHECKOUT
@@ -235,7 +227,7 @@ export default function ProductIntro({ product }: Props) {
     <Box width="100%">
       <Grid container spacing={3} justifyContent="space-around">
         {/* IMAGE GALLERY AREA */}
-        <Grid item md={6} xs={12} alignItems="center">
+        <Grid item md={4} xs={12} alignItems="center">
           <FlexBox
             position="relative"
             borderRadius={3}

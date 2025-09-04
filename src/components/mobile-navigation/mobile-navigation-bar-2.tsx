@@ -7,7 +7,6 @@ import { Theme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 // CUSTOM ICON COMPONENTS
 import Home from "icons/Home";
-import User2 from "icons/User2";
 import CategoryOutlined from "icons/CategoryOutline";
 import ShoppingBagOutlined from "icons/ShoppingBagOutlined";
 // GLOBAL CUSTOM HOOKS
@@ -77,5 +76,5 @@ const list = [
   { title: "Home", Icon: Home, href: "/" },
   { title: "Category", Icon: CategoryOutlined },
   { title: "Cart", Icon: ShoppingBagOutlined, href: "/cart" },
-  { title: "Account", Icon: User2, href: "/profile" }
+  // Account removed for guest-only shop
 ];

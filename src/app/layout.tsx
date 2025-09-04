@@ -8,6 +8,7 @@ export const openSans = Open_Sans({ subsets: ["latin"] });
 import ThemeProvider from "theme/theme-provider";
 // PRODUCT CART PROVIDER
 import CartProvider from "contexts/CartContext";
+// Removed GraphQL cart provider to unify on local useCart
 // SITE SETTINGS PROVIDER
 import SettingsProvider from "contexts/SettingContext";
 // TOAST NOTIFICATION PROVIDER
@@ -24,14 +25,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <body className={openSans.className}>
         <CartProvider>
-          <SettingsProvider>
-            <ThemeProvider>
-              <ToastProvider>
-                <ProgressBar />
-                <RTL>{children}</RTL>
-              </ToastProvider>
-            </ThemeProvider>
-          </SettingsProvider>
+            <SettingsProvider>
+              <ThemeProvider>
+                <ToastProvider>
+                  <ProgressBar />
+                  <RTL>{children}</RTL>
+                </ToastProvider>
+              </ThemeProvider>
+            </SettingsProvider>
         </CartProvider>
         <GoogleAnalytics gaId="G-XKPD36JXY0" />
       </body>

@@ -5,7 +5,6 @@ import { Theme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 // CUSTOM ICON COMPONENTS
 import Home from "icons/Home";
-import User2 from "icons/User2";
 import CategoryOutlined from "icons/CategoryOutline";
 import ShoppingBagOutlined from "icons/ShoppingBagOutlined";
 // GLOBAL CUSTOM HOOK
@@ -14,7 +13,8 @@ import useCart from "hooks/useCart";
 import { iconStyle, StyledNavLink, Wrapper } from "./styles";
 
 export default function MobileNavigationBar() {
-  const { state } = useCart();
+  const { getCartItemCount } = useCart();
+  const itemCount = getCartItemCount();
   const DOWN_900 = useMediaQuery((theme: Theme) => theme.breakpoints.down(900));
 
   if (DOWN_900) {
@@ -23,7 +23,7 @@ export default function MobileNavigationBar() {
         {list.map(({ Icon, href, title }) => (
           <StyledNavLink href={href} key={title}>
             {title === "Cart" ? (
-              <Badge badgeContent={state.cart.length} color="primary">
+              <Badge badgeContent={itemCount} color="primary">
                 <Icon fontSize="small" sx={iconStyle} />
               </Badge>
             ) : (
@@ -44,5 +44,5 @@ const list = [
   { title: "Home", Icon: Home, href: "/" },
   { title: "Category", Icon: CategoryOutlined, href: "/mobile-category-nav" },
   { title: "Cart", Icon: ShoppingBagOutlined, href: "/cart" },
-  { title: "Account", Icon: User2, href: "/profile" }
+  // Account removed for guest-only shop
 ];

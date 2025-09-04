@@ -2,14 +2,15 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 // LOCAL CUSTOM COMPONENTS
 import SearchResult from "./components/search-result";
-import CategoryDropdown from "./components/category-dropdown";
+import { useTranslation } from "react-i18next";
 // LOCAL CUSTOM HOOKS
 import useSearch from "./hooks/use-search";
 // CUSTOM ICON COMPONENT
 import Search from "icons/Search";
 
 export default function SearchInputWithCategory() {
-  const { categoryTitle, parentRef, resultList, handleCategoryChange, handleSearch } = useSearch();
+  const { parentRef, resultList, handleSearch } = useSearch();
+  const { t } = useTranslation();
 
   const INPUT_PROPS = {
     sx: {
@@ -32,7 +33,6 @@ export default function SearchInputWithCategory() {
         <Search sx={{ fontSize: 17, color: "grey.600" }} />
       </Box>
     ),
-    endAdornment: <CategoryDropdown title={categoryTitle} handleChange={handleCategoryChange} />
   };
 
   return (
@@ -40,7 +40,7 @@ export default function SearchInputWithCategory() {
       <TextField
         fullWidth
         variant="outlined"
-        placeholder="Searching for..."
+        placeholder={`${t("Search")}...`}
         onChange={handleSearch}
         InputProps={INPUT_PROPS}
       />

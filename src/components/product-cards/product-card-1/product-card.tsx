@@ -14,7 +14,12 @@ import HoverActions from "./components/hover-actions";
 import ProductPrice from "../product-price";
 import ProductTitle from "../product-title";
 import DiscountChip from "../discount-chip";
-import QuantityButtons from "./components/quantity-buttons";
+import IconButton from "@mui/material/IconButton";
+import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
+import useCart from "hooks/useCart";
+import VariantConfigDialog from "../variant-config-dialog";
+import axios from "axios";
+import { useCallback, useState } from "react";
 // STYLED COMPONENTS
 import { ImageWrapper, ContentWrapper, StyledBazaarCard } from "./styles";
 
@@ -45,32 +50,35 @@ export default function ProductCard1({
   discount = 5,
   showProductSize
 }: Props) {
-  const { isFavorite, openModal, cartItem, toggleDialog, toggleFavorite, handleCartAmountChange } =
-    useProduct(slug);
-
-  const handleIncrementQuantity = () => {
-    const product = {
-      id,
-      slug,
-      price,
-      imgUrl,
-      name: title,
-      qty: (cartItem?.qty || 0) + 1
-    };
-    handleCartAmountChange(product);
+  const { isFavorite, openModal, toggleDialog, toggleFavorite } = useProduct(slug);
+  const { addToCart } = useCart();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [productDetail, setProductDetail] = useState<any>(null);
+  const closeDialog = useCallback(() => setDialogOpen(false), []);
+  const onConfirmVariant = useCallback((variantId: string) => {
+    closeDialog();
+    const variant = productDetail?.variants?.find((v: any) => String(v.id) === String(variantId));
+    addToCart({ id: String(variantId), slug, price: variant?.priceWithTax ?? price, imgUrl, name: title, qty: 1 });
+  }, [addToCart, closeDialog, productDetail, slug, price, imgUrl, title]);
+  const handleAddToCart = async () => {
+    try {
+      const { data } = await axios.get(`/api/products/${slug}`);
+      const product = data?.product;
+      const pv = product?.variants || [];
+      if (pv.length === 1) {
+        addToCart({ id: String(pv[0].id), slug, price: pv[0].priceWithTax ?? price, imgUrl, name: title, qty: 1 });
+        return;
+      }
+      if (pv.length > 1) {
+        setProductDetail(product);
+        setDialogOpen(true);
+      }
+    } catch (e) {
+      // ignore
+    }
   };
 
-  const handleDecrementQuantity = () => {
-    const product = {
-      id,
-      slug,
-      price,
-      imgUrl,
-      name: title,
-      qty: (cartItem?.qty || 0) - 1
-    };
-    handleCartAmountChange(product, "remove");
-  };
+  
 
   return (
     <StyledBazaarCard hoverEffect={hoverEffect}>
@@ -114,16 +122,14 @@ export default function ProductCard1({
           ) : null}
 
           {/* PRODUCT PRICE WITH DISCOUNT */}
-          <ProductPrice discount={discount} price={price} />
+          <ProductPrice listPrice={discount ? price / (1 - discount / 100) : 0} price={price} />
         </Box>
 
-        {/* PRODUCT QUANTITY HANDLER BUTTONS */}
-        <QuantityButtons
-          quantity={cartItem?.qty || 0}
-          handleIncrement={handleIncrementQuantity}
-          handleDecrement={handleDecrementQuantity}
-        />
+        <IconButton color="primary" onClick={handleAddToCart}>
+          <AddShoppingCartIcon fontSize="small" />
+        </IconButton>
       </ContentWrapper>
+      <VariantConfigDialog open={dialogOpen} product={productDetail} onClose={closeDialog} onConfirm={onConfirmVariant} />
     </StyledBazaarCard>
   );
 }

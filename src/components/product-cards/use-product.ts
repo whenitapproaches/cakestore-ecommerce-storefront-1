@@ -4,7 +4,6 @@ import useCart from "hooks/useCart";
 
 export default function useProduct(slug: string) {
   const { state, dispatch } = useCart();
-  const { enqueueSnackbar } = useSnackbar();
   const [openModal, setOpenModal] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
 
@@ -15,9 +14,6 @@ export default function useProduct(slug: string) {
 
   const handleCartAmountChange = (product: typeof cartItem, type?: "remove") => {
     dispatch({ type: "CHANGE_CART_AMOUNT", payload: product });
-    // SHOW ALERT PRODUCT ADDED OR REMOVE
-    if (type === "remove") enqueueSnackbar("Remove from Cart", { variant: "error" });
-    else enqueueSnackbar("Added to Cart", { variant: "success" });
   };
 
   return {

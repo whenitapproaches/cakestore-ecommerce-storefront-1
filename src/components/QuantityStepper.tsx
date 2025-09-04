@@ -4,6 +4,7 @@ import { FC } from "react"
 import Box from "@mui/material/Box"
 import Button from "@mui/material/Button"
 import Typography from "@mui/material/Typography"
+import TextField from "@mui/material/TextField"
 import AddIcon from "@mui/icons-material/Add"
 import RemoveIcon from "@mui/icons-material/Remove"
 
@@ -32,6 +33,31 @@ const QuantityStepper: FC<QuantityStepperProps> = ({
     if (quantity < max) {
       onQuantityChange(quantity + 1)
     }
+  }
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value
+    // Allow empty input to quickly type; fallback to min on blur
+    if (value === "") {
+      onQuantityChange(min)
+      return
+    }
+    const next = parseInt(value, 10)
+    if (!Number.isNaN(next)) {
+      const clamped = Math.max(min, Math.min(max, next))
+      onQuantityChange(clamped)
+    }
+  }
+
+  const handleInputBlur = (event: React.FocusEvent<HTMLInputElement>) => {
+    const value = event.target.value
+    const next = parseInt(value, 10)
+    if (Number.isNaN(next)) {
+      onQuantityChange(min)
+      return
+    }
+    const clamped = Math.max(min, Math.min(max, next))
+    if (clamped !== quantity) onQuantityChange(clamped)
   }
 
   return (
@@ -85,14 +111,33 @@ const QuantityStepper: FC<QuantityStepperProps> = ({
         minWidth={60}
         textAlign="center"
       >
-        <Typography
-          variant="body1"
-          fontWeight={500}
-          color="text.primary"
-          sx={{ userSelect: "none" }}
-        >
-          {quantity}
-        </Typography>
+        <TextField
+          value={Number.isFinite(quantity) ? quantity : ""}
+          onChange={handleInputChange}
+          onBlur={handleInputBlur}
+          disabled={disabled}
+          type="number"
+          inputProps={{ min, max, inputMode: "numeric", pattern: "[0-9]*" }}
+          variant="standard"
+          InputProps={{ disableUnderline: true }}
+          sx={{
+            width: 60,
+            "& input": {
+              textAlign: "center",
+              fontWeight: 500,
+              color: "text.primary",
+              p: 0,
+            },
+            // Hide native number input steppers
+            "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button": {
+              WebkitAppearance: "none",
+              margin: 0,
+            },
+            "& input[type=number]": {
+              MozAppearance: "textfield",
+            },
+          }}
+        />
       </Box>
 
       {/* Increase Button */}

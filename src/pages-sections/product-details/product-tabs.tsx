@@ -41,12 +41,10 @@ export default function ProductTabs({ description }: Props) {
         indicatorColor="primary"
         onChange={handleOptionClick}>
         <Tab className="inner-tab" label={t("Description")} />
-        <Tab className="inner-tab" label={`${t("Review")} (3)`} />
       </StyledTabs>
 
       <Box mb={6}>
         {selectedOption === 0 && <ProductDescription description={description} />}
-        {selectedOption === 1 && <ProductReview />}
       </Box>
     </>
   );

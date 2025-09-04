@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
-import { storefrontApiMutation, storefrontApiQuery } from "graphql/client"
+import { cookies } from "next/headers"
+import { storefrontApiMutation, storefrontApiQuery, latestVendureAuthToken } from "graphql/client"
 import { getContext } from "lib/getStatic"
 import { ActiveOrderSelector } from "graphql/selectors"
 import { HttpStatusCode } from "axios"
@@ -21,6 +22,16 @@ export async function GET() {
     response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
     response.headers.set('Pragma', 'no-cache')
     response.headers.set('Expires', '0')
+
+    const vendureAuthToken = latestVendureAuthToken || cookies().get('vendure-auth-token')?.value
+    if (vendureAuthToken) {
+      response.cookies.set('vendure-auth-token', vendureAuthToken, {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+      })
+    }
 
     return response
   } catch (error) {
@@ -89,6 +100,16 @@ export async function POST(req: NextRequest) {
       response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
       response.headers.set('Pragma', 'no-cache')
       response.headers.set('Expires', '0')
+
+      const vendureAuthToken = latestVendureAuthToken || cookies().get('vendure-auth-token')?.value
+      if (vendureAuthToken) {
+        response.cookies.set('vendure-auth-token', vendureAuthToken, {
+          httpOnly: true,
+          sameSite: 'lax',
+          path: '/',
+          secure: process.env.NODE_ENV === 'production',
+        })
+      }
 
       return response
     } else {
@@ -167,6 +188,16 @@ export async function PUT(req: NextRequest) {
       response.headers.set('Pragma', 'no-cache')
       response.headers.set('Expires', '0')
 
+      const vendureAuthToken = latestVendureAuthToken || cookies().get('vendure-auth-token')?.value
+      if (vendureAuthToken) {
+        response.cookies.set('vendure-auth-token', vendureAuthToken, {
+          httpOnly: true,
+          sameSite: 'lax',
+          path: '/',
+          secure: process.env.NODE_ENV === 'production',
+        })
+      }
+
       return response
     } else {
       return NextResponse.json(
@@ -231,6 +262,16 @@ export async function DELETE(req: NextRequest) {
       response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
       response.headers.set('Pragma', 'no-cache')
       response.headers.set('Expires', '0')
+
+      const vendureAuthToken = latestVendureAuthToken || cookies().get('vendure-auth-token')?.value
+      if (vendureAuthToken) {
+        response.cookies.set('vendure-auth-token', vendureAuthToken, {
+          httpOnly: true,
+          sameSite: 'lax',
+          path: '/',
+          secure: process.env.NODE_ENV === 'production',
+        })
+      }
 
       return response
     } else {

@@ -1,5 +1,7 @@
 import Link from "next/link"
 import Rating from "@mui/material/Rating"
+import IconButton from "@mui/material/IconButton"
+import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart"
 // GLOBAL CUSTOM COMPONENTS
 import { H6 } from "components/Typography"
 import LazyImage from "components/LazyImage"
@@ -12,11 +14,12 @@ import { PriceText } from "./styles"
 import Product from "models/Product.model"
 
 import DiscountChip from "../discount-chip"
-import QuantityButtons from "./components/quantity-buttons"
-// LOCAL CUSTOM HOOKS
-import useProduct from "../use-product"
-import { useMemo } from "react"
+// CART CONTAINER
+import useCart from "hooks/useCart"
+import { useMemo, useState, useCallback } from "react"
 import clsx from "clsx"
+import VariantConfigDialog from "../variant-config-dialog"
+import axios from "axios"
 
 // ==============================================================
 type Props = { product: Product }
@@ -33,30 +36,31 @@ export default function ProductCard16({ product }: Props) {
     id,
   } = product || {}
 
-  const { cartItem, handleCartAmountChange } = useProduct(slug)
-
-  const handleIncrementQuantity = () => {
-    const product = {
-      id,
-      slug,
-      price,
-      name: title,
-      imgUrl: thumbnail,
-      qty: (cartItem?.qty || 0) + 1,
+  const { addToCart } = useCart()
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [productDetail, setProductDetail] = useState<any>(null)
+  const closeDialog = useCallback(() => setDialogOpen(false), [])
+  const onConfirmVariant = useCallback((variantId: string) => {
+    closeDialog()
+    const variant = productDetail?.variants?.find((v: any) => String(v.id) === String(variantId))
+    addToCart({ id: String(variantId), slug, price: variant?.priceWithTax ?? price, name: title, imgUrl: thumbnail, qty: 1 })
+  }, [addToCart, closeDialog, productDetail, slug, price, title, thumbnail])
+  const handleAddToCart = async () => {
+    try {
+      const { data } = await axios.get(`/api/products/${slug}`)
+      const product = data?.product
+      const pv = product?.variants || []
+      if (pv.length === 1) {
+        addToCart({ id: String(pv[0].id), slug, price: pv[0].priceWithTax ?? price, name: title, imgUrl: thumbnail, qty: 1 })
+        return
+      }
+      if (pv.length > 1) {
+        setProductDetail(product)
+        setDialogOpen(true)
+      }
+    } catch (e) {
+      // ignore
     }
-    handleCartAmountChange(product)
-  }
-
-  const handleDecrementQuantity = () => {
-    const product = {
-      id,
-      slug,
-      price,
-      name: title,
-      imgUrl: thumbnail,
-      qty: (cartItem?.qty || 0) - 1,
-    }
-    handleCartAmountChange(product, "remove")
   }
 
   const discount = useMemo(() => {
@@ -73,7 +77,7 @@ export default function ProductCard16({ product }: Props) {
         </FlexBox>
       </Link>
 
-      <FlexBox height="100%" justifyContent="space-between">
+      <FlexBox height="100%" justifyContent="space-between" alignItems="end">
         <FlexBox
           height="100%"
           flexDirection="column"
@@ -103,13 +107,11 @@ export default function ProductCard16({ product }: Props) {
           </PriceText>
         </FlexBox>
 
-        {/* PRODUCT QUANTITY HANDLER BUTTONS */}
-        <QuantityButtons
-          quantity={cartItem?.qty || 0}
-          handleIncrement={handleIncrementQuantity}
-          handleDecrement={handleDecrementQuantity}
-        />
+        <IconButton color="primary" onClick={handleAddToCart}>
+          <AddShoppingCartIcon fontSize="small" />
+        </IconButton>
       </FlexBox>
+      <VariantConfigDialog open={dialogOpen} product={productDetail} onClose={closeDialog} onConfirm={onConfirmVariant} />
     </FlexBox>
   )
 }

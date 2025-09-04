@@ -1,7 +1,7 @@
 import { useRouter } from "next/navigation";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
-// GLOBAL CUSTOM HOOK
+// Local cart hook
 import useCart from "hooks/useCart";
 // LOCAL CUSTOM COMPONENTS
 import TopHeader from "./components/top-header";
@@ -25,10 +25,7 @@ export default function MiniCart({ toggleSidenav }: Props) {
   const cartList = state.cart;
 
   const handleCartAmountChange = (amount: number, product: CartItem) => () => {
-    dispatch({
-      type: "CHANGE_CART_AMOUNT",
-      payload: { ...product, qty: amount }
-    });
+    dispatch({ type: "CHANGE_CART_AMOUNT", payload: { ...product, qty: amount } });
   };
 
   const getTotalPrice = () => {

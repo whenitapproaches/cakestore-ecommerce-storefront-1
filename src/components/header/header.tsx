@@ -10,9 +10,9 @@ import LazyImage from "components/LazyImage";
 import FlexBox from "components/flex-box/flex-box";
 // LOCAL CUSTOM COMPONENTS
 import MobileHeader from "./components/mobile-header";
-import DialogDrawer from "./components/dialog-drawer";
 import CategoriesMenu from "./components/categories-menu";
 import LoginCartButtons from "./components/login-cart-buttons";
+import DialogDrawer from "./components/dialog-drawer";
 // STYLED COMPONENTS
 import { HeaderWrapper, StyledContainer } from "./styles";
 
@@ -27,7 +27,7 @@ interface Props {
 export default function Header({ isFixed, className, midSlot }: Props) {
   const theme = useTheme();
   const downMd = useMediaQuery(theme.breakpoints.down(1150));
-  const { dialogOpen, sidenavOpen, toggleDialog, toggleSidenav } = useHeader();
+  const { sidenavOpen, toggleSidenav } = useHeader();
 
   const CONTENT_FOR_LARGE_DEVICE = (
     <Fragment>
@@ -44,16 +44,11 @@ export default function Header({ isFixed, className, midSlot }: Props) {
       {/* SEARCH FORM | NAVIGATION */}
       {midSlot}
 
-      {/* LOGIN AND CART BUTTON */}
-      <LoginCartButtons toggleDialog={toggleDialog} toggleSidenav={toggleSidenav} />
+      {/* CART BUTTON ONLY */}
+      <LoginCartButtons toggleSidenav={toggleSidenav} />
 
-      {/* LOGIN FORM DIALOG AND CART SIDE BAR  */}
-      <DialogDrawer
-        dialogOpen={dialogOpen}
-        sidenavOpen={sidenavOpen}
-        toggleDialog={toggleDialog}
-        toggleSidenav={toggleSidenav}
-      />
+      {/* CART SIDE BAR */}
+      <DialogDrawer sidenavOpen={sidenavOpen} toggleSidenav={toggleSidenav} />
     </Fragment>
   );
 

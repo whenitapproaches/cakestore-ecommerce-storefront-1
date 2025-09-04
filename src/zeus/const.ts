@@ -1371,7 +1371,20 @@ export const ReturnTypes: Record<string,any> = {
 		facetValueIds:"ID",
 		collectionIds:"ID",
 		score:"Float",
-		inStock:"Boolean"
+		inStock:"Boolean",
+		optionsCount:"Int",
+	},
+	ProductVariantPreview:{
+		productId:"ID",
+		available:"Boolean",
+		variants:"ProductVariant",
+	},
+	ProductVariant:{
+		id:"ID",
+		name:"String",
+		price:"Money",
+		currencyCode:"CurrencyCode",
+		stockOnHand:"Int",
 	},
 	SearchResultPrice:{
 		"...on PriceRange":"PriceRange",

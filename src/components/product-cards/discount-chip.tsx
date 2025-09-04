@@ -15,7 +15,11 @@ const StyledChip = styled(Chip, {
   color: theme.palette.common.white,
   background: theme.palette.success.main,
   userSelect: 'none',
-  ...(shape === "square" && { borderRadius: 0 })
+  ...(shape === "square" && { borderRadius: 0 }),
+  "&:hover": {
+    background: theme.palette.success.main,
+    color: theme.palette.common.white,
+  }
 }));
 
 // ==============================================================

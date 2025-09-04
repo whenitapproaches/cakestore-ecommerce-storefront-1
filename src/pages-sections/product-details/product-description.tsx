@@ -1,6 +1,5 @@
 "use client";
 
-import { H3 } from "components/Typography";
 import Box from "@mui/material/Box";
 // TRANSLATION
 import { useTranslation } from "react-i18next";
@@ -13,24 +12,11 @@ export default function ProductDescription({ description }: Props) {
   const { t } = useTranslation();
   
   if (!description) {
-    return (
-      <div>
-        <H3 mb={2}>Specification:</H3>
-        <div>
-          Brand: Beats <br />
-          Model: S450 <br />
-          Wireless Bluetooth Headset <br />
-          FM Frequency Response: 87.5 – 108 MHz <br />
-          Feature: FM Radio, Card Supported (Micro SD / TF) <br />
-          Made in China <br />
-        </div>
-      </div>
-    );
+    return <Box>{t("This Product Has No Description")}</Box>;
   }
 
   return (
     <div>
-      <H3 mb={2}>{t("Description")}:</H3>
       <Box 
         dangerouslySetInnerHTML={{ __html: description }}
         sx={{

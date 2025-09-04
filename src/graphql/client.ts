@@ -12,6 +12,9 @@ import { getContext } from "lib/getStatic"
 let token: string | null =
   typeof window !== "undefined" ? window.localStorage.getItem("token") : null
 
+// Expose last vendure auth token observed during this request lifecycle
+export let latestVendureAuthToken: string | null = null
+
 export const scalars = ZeusScalars({
   Money: {
     decode: (e) => e as number,
@@ -26,12 +29,12 @@ export const scalars = ZeusScalars({
   },
 })
 
-export const VENDURE_HOST = process.env.VENDURE_HOST
+export const VENDURE_HOST = process.env.NEXT_PUBLIC_VENDURE_HOST || process.env.VENDURE_HOST
 
 const apiFetchVendure =
   (options: fetchOptions) =>
   (query: string, variables: Record<string, unknown> = {}) => {
-    const fetchOptions = options[1] || {}
+    const baseFetchOptions = options[1] || {}
 
     if (query.includes('sort: {')) {
       query = query.replace('"DESC"', 'DESC').replace('"ASC"', 'ASC')
@@ -40,45 +43,112 @@ const apiFetchVendure =
     // TODO: turn this off
     console.log(query)
 
-    if (fetchOptions.method && fetchOptions.method === "GET") {
-      return fetch(
-        `${options[0]}?query=${encodeURIComponent(query)}`,
-        fetchOptions
-      )
-        .then(handleFetchResponse)
-        .then((response: GraphQLResponse) => {
-          if (response.errors) {
-            throw new GraphQLError(response)
+    const buildAuthHeaders = async (): Promise<Record<string, string>> => {
+      // Prefer token from incoming headers or request cookies on the server; avoid module state on server
+      if (typeof window === "undefined") {
+        try {
+          const mod = await import("next/headers")
+          const h = mod.headers()
+          const incomingAuth = h.get("authorization")
+          if (incomingAuth) {
+            return { Authorization: incomingAuth }
           }
-          return response.data
-        })
-    }
-    const additionalHeaders: Record<string, string> = token
-      ? { Authorization: `Bearer ${token}` }
-      : {}
-    return fetch(`${options[0]}`, {
-      body: JSON.stringify({ query, variables }),
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        ...additionalHeaders,
-      },
-      ...fetchOptions,
-    })
-      .then((r) => {
-        const authToken = r.headers.get("vendure-auth-token")
-        if (authToken != null) {
-          token = authToken
+          const cookieToken = mod.cookies().get("vendure-auth-token")?.value
+          if (cookieToken) {
+            return { Authorization: `Bearer ${cookieToken}` }
+          }
+          return {}
+        } catch (_) {
+          return {}
         }
-        return handleFetchResponse(r)
-      })
-      .then((response: GraphQLResponse) => {
+      }
+      // On client, fall back to in-memory/localStorage token
+      return token ? { Authorization: `Bearer ${token}` } : {}
+    }
+
+    const persistAuthToken = async (authToken: string | null) => {
+      if (!authToken) return
+      // Persist for subsequent requests
+      if (typeof window !== "undefined") {
+        token = authToken
+      }
+      latestVendureAuthToken = authToken
+      if (typeof window === "undefined") {
+        try {
+          const mod = await import("next/headers")
+          // httpOnly cookie so browser JS can't read it; used by server routes
+          mod
+            .cookies()
+            .set("vendure-auth-token", authToken, {
+              httpOnly: true,
+              sameSite: "lax",
+              path: "/",
+              secure: process.env.NODE_ENV === "production",
+            })
+        } catch (_) {
+          // ignore if cookies API unavailable
+        }
+      } else {
+        try {
+          window.localStorage.setItem("token", authToken)
+        } catch (_) {
+          // ignore storage failures
+        }
+      }
+    }
+
+    const doRequest = async () => {
+      const method = (baseFetchOptions as RequestInit).method || "POST"
+      const authHeaders = await buildAuthHeaders()
+
+      const baseHeadersInit = (baseFetchOptions as RequestInit).headers
+      // Normalize headers into a plain object to merge safely
+      const baseHeaders = (() => {
+        if (!baseHeadersInit) return {}
+        if (baseHeadersInit instanceof Headers) {
+          return Object.fromEntries(baseHeadersInit.entries()) as Record<string, string>
+        }
+        if (Array.isArray(baseHeadersInit)) {
+          return Object.fromEntries(baseHeadersInit) as Record<string, string>
+        }
+        return baseHeadersInit as Record<string, string>
+      })()
+
+      const mergedHeaders: Record<string, string> = {
+        ...baseHeaders,
+        "Content-Type": "application/json",
+        ...authHeaders,
+      }
+
+      if (method === "GET") {
+        const r = await fetch(
+          `${options[0]}?query=${encodeURIComponent(query)}`,
+          { ...(baseFetchOptions as RequestInit), headers: mergedHeaders, credentials: "include" }
+        )
+        await persistAuthToken(r.headers.get("vendure-auth-token"))
+        const response = await handleFetchResponse(r)
         if (response.errors) {
           throw new GraphQLError(response)
         }
         return response.data
+      }
+
+      const r = await fetch(`${options[0]}`, {
+        ...(baseFetchOptions as RequestInit),
+        body: JSON.stringify({ query, variables }),
+        method: "POST",
+        credentials: "include",
+        headers: mergedHeaders,
       })
+      await persistAuthToken(r.headers.get("vendure-auth-token"))
+      const response = await handleFetchResponse(r)
+      if (response.errors) {
+        throw new GraphQLError(response)
+      }
+      return response.data
+    }
+
+    return doRequest()
   }
 
 export const VendureChain = (...options: chainOptions) =>
@@ -94,6 +164,7 @@ export const storefrontApiQuery = (ctx: {
     headers: {
       "Content-Type": "application/json",
       "vendure-token": ctx.channel,
+      // ensure Authorization attached on server too (cookies() already handled in apiFetchVendure)
     },
   })("query", { scalars })
 }
@@ -108,6 +179,7 @@ export const storefrontApiMutation = (ctx: {
     headers: {
       "Content-Type": "application/json",
       "vendure-token": ctx.channel,
+      // ensure Authorization attached on server too (cookies() already handled in apiFetchVendure)
     },
   })("mutation", { scalars })
 }
@@ -143,6 +215,9 @@ export const SSRQuery = (context: GetServerSidePropsContext) => {
       Cookie: `session=${authCookies["session"]}; session.sig=${authCookies["session.sig"]}`,
       "Content-Type": "application/json",
       "vendure-token": properChannel,
+      ...(context.req.cookies["vendure-auth-token"]
+        ? { Authorization: `Bearer ${context.req.cookies["vendure-auth-token"]}` }
+        : {}),
     },
   })("query", { scalars })
 }
@@ -163,6 +238,9 @@ export const SSRMutation = (context: GetServerSidePropsContext) => {
       Cookie: `session=${authCookies["session"]}; session.sig=${authCookies["session.sig"]}`,
       "Content-Type": "application/json",
       "vendure-token": properChannel,
+      ...(context.req.cookies["vendure-auth-token"]
+        ? { Authorization: `Bearer ${context.req.cookies["vendure-auth-token"]}` }
+        : {}),
     },
   })("mutation", { scalars })
 }

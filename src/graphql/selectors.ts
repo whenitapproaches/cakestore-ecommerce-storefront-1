@@ -659,5 +659,18 @@ export const ProductSearchResultSelector = Selector("ProductSearchResult")({
   listPrice: true,
   asset: {
     preview: true,
-  }
+  },
+  optionsCount: true,
+})
+
+export const ProductVariantPreviewSelector = Selector("ProductVariantPreview")({
+  productId: true,
+  available: true,
+  variants: {
+    id: true,
+    name: true,
+    price: true,
+    currencyCode: true,
+    stockOnHand: true,
+  },
 })
