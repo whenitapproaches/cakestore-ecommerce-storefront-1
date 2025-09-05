@@ -32,6 +32,7 @@ export default function MiniCartItem({ item, handleIncrease, handleDecrease, han
       key={item.id}
       alignItems="center"
       borderBottom="1px solid"
+      sx={{ opacity: item.stockLevel === "OUT_OF_STOCK" ? 0.5 : 1 }}
       borderColor="divider">
       <FlexBox alignItems="center" flexDirection="column">
         <Button
@@ -74,6 +75,9 @@ export default function MiniCartItem({ item, handleIncrease, handleDecrease, han
         <H6 color="primary.main" mt={0.5}>
           {formatCurrency(item.qty * item.price)}
         </H6>
+        {item.stockLevel === "OUT_OF_STOCK" ? (
+          <Tiny color="error.main" mt={0.5}>Hết hàng</Tiny>
+        ) : null}
       </Box>
 
       <IconButton size="small" onClick={() => handleRemove(item)} sx={{ marginLeft: 2.5 }}>

@@ -49,11 +49,10 @@ export default function ProductIntro({ product }: Props) {
     optionGroups,
   } = product || {}
 
-  // Get the first variant for price and stock info
+  // Get the first variant for initial price and stock info
   const firstVariant = variants?.[0]
   const price = firstVariant?.priceWithTax || 0
   const listPrice = (product as any)?.listPrice || 0 // Use legacy listPrice from product
-  const stockLevel = firstVariant?.stockLevel || "OUT_OF_STOCK"
 
   // Calculate discount
   const discount = useMemo(() => {
@@ -376,7 +375,7 @@ export default function ProductIntro({ product }: Props) {
             )}
 
             <Box color="inherit" fontSize="14px">
-              {stockLevel === "IN_STOCK"
+              {(selectedVariant?.stockLevel || firstVariant?.stockLevel) === "IN_STOCK"
                 ? t("Stock Available")
                 : t("Out of Stock")}
             </Box>
@@ -394,7 +393,7 @@ export default function ProductIntro({ product }: Props) {
                 onQuantityChange={setQuantity}
                 min={1}
                 max={99}
-                disabled={stockLevel === "OUT_OF_STOCK"}
+                disabled={(selectedVariant?.stockLevel || firstVariant?.stockLevel) === "OUT_OF_STOCK"}
               />
             </Box>
 
@@ -405,7 +404,7 @@ export default function ProductIntro({ product }: Props) {
                 color="primary"
                 variant="contained"
                 onClick={handleBuyNow}
-                disabled={stockLevel === "OUT_OF_STOCK"}
+                disabled={(selectedVariant?.stockLevel || firstVariant?.stockLevel) === "OUT_OF_STOCK"}
                 sx={{
                   px: "1.75rem",
                   height: 48,
@@ -422,7 +421,7 @@ export default function ProductIntro({ product }: Props) {
                 color="primary"
                 variant="outlined"
                 onClick={handleAddToCart}
-                disabled={stockLevel === "OUT_OF_STOCK" || isAddingToCart}
+                disabled={(selectedVariant?.stockLevel || firstVariant?.stockLevel) === "OUT_OF_STOCK" || isAddingToCart}
                 sx={{
                   px: "1.75rem",
                   height: 48,

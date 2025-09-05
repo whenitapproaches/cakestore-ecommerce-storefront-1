@@ -253,12 +253,77 @@ export const ordersApi = {
   delete: (id: string) => api.delete(`/api/orders/${id}`),
 }
 
+// Shipping-related endpoints under orders
+export const shippingApi = {
+  // Get eligible shipping methods for the active order
+  getEligibleMethods: () =>
+    api.get<{ methods: Array<{ id: string; name: string; description?: string | null; price: number }> }>(
+      '/api/orders/shipping'
+    ),
+
+  // Apply shipping method(s) to the active order
+  setShippingMethod: (ids: string[] | string) => {
+    const shippingMethodIds = Array.isArray(ids) ? ids : [ids]
+    return api.post<{ success: boolean; order: any }>(
+      '/api/orders/shipping',
+      { shippingMethodIds }
+    )
+  },
+}
+
+// Coupon endpoints
+export const couponApi = {
+  apply: (code: string) => api.post<{ success: boolean; order: any }>(
+    '/api/orders/coupon',
+    { code }
+  ),
+  remove: (code: string) => api.delete<{ success: boolean; order: any }>(
+    `/api/orders/coupon?code=${encodeURIComponent(code)}`
+  ),
+}
+
 export const storeSettingsApi = {
   // Get store settings by keys (comma or pipe-separated)
   getByKeys: (keys: string | string[]) => {
     const keysParam = Array.isArray(keys) ? keys.join("|") : keys
     return api.get('/api/store-settings', { keys: keysParam })
   },
+}
+
+// Cart endpoint
+export const cartApi = {
+  getActive: () => api.get('/api/cart'),
+}
+
+// Order detail fetcher for SSR/Server Components
+export interface OrderDetailResponse {
+  order: any
+  qrImageUrl: string | null
+  qrImageUrl2: string | null
+}
+
+export const fetchOrder = async (
+  code: string,
+  opts?: { baseURL?: string; cookie?: string; headers?: Record<string, string>; token?: string }
+): Promise<OrderDetailResponse> => {
+  const base = opts?.baseURL || API_BASE_URL
+  const hdrs: Record<string, string> = {
+    ...(opts?.headers || {}),
+    ...(opts?.cookie ? { cookie: opts.cookie } : {}),
+  }
+
+  const url = new URL(`${base}/api/orders/${encodeURIComponent(code)}`)
+  if (opts?.token) url.searchParams.set('token', opts.token)
+
+  const res = await fetch(url.toString(), {
+    headers: hdrs,
+    cache: 'no-store',
+  })
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch order: ${res.status}`)
+  }
+  return (await res.json()) as OrderDetailResponse
 }
 
 export const authApi = {

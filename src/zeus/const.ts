@@ -1751,6 +1751,12 @@ export const ReturnTypes: Record<string, any> = {
     "...on Order": "Order",
     "...on NoActiveOrderError": "NoActiveOrderError",
   },
+  StoreSettings: {
+    id: "ID",
+    key: "String",
+    value: "String",
+    createdAt: "DateTime",
+  },
 }
 
 export const Ops = {

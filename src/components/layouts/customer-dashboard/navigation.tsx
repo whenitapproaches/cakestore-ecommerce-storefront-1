@@ -48,6 +48,7 @@ const MENUS = [
     title: "DASHBOARD",
     list: [
       { href: "/orders", title: "Orders", Icon: ShoppingBagOutlined, count: 5 },
+      { href: "/orders/tracking", title: "Order Tracking", Icon: ShoppingBagOutlined, count: 0 },
       {
         href: "/wish-list",
         title: "Wishlist",

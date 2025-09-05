@@ -14,6 +14,7 @@ export type CartItem = {
   id: string | number
   options?: Record<string, string>
   orderLineId?: string
+  stockLevel?: string
 }
 
 type CartActionType =
@@ -96,6 +97,7 @@ export default function CartProvider({ children }: PropsWithChildren) {
             l?.productVariant?.featuredAsset?.preview ??
             l?.productVariant?.featuredAsset?.source,
           slug: l?.productVariant?.product?.slug ?? "",
+          stockLevel: l?.productVariant?.stockLevel,
         }))
         if (!cancelled) dispatch({ type: "SET_CART", payload: mapped })
       } catch {}

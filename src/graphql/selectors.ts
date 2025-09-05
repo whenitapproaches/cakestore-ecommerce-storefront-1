@@ -459,6 +459,34 @@ export type ActiveOrderType = FromSelector<
   typeof scalars
 >
 
+// Minimal masked order details for order-by-code public route
+export const OrderMaskedSelector = Selector("Order")({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  type: true,
+  orderPlacedAt: true,
+  code: true,
+  state: true,
+  active: true,
+  couponCodes: true,
+  totalQuantity: true,
+  subTotal: true,
+  subTotalWithTax: true,
+  currencyCode: true,
+  shipping: true,
+  shippingWithTax: true,
+  total: true,
+  totalWithTax: true,
+  customFields: true,
+})
+
+export type OrderMaskedType = FromSelector<
+  typeof OrderMaskedSelector,
+  "Order",
+  typeof scalars
+>
+
 export const OrderSelector = Selector("Order")({
   type: true,
 

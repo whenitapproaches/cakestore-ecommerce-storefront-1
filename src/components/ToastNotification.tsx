@@ -34,13 +34,15 @@ interface ToastNotificationProps {
   isVisible: boolean
   onClose: () => void
   duration?: number
+  variant?: "success" | "error"
 }
 
 const ToastNotification: FC<ToastNotificationProps> = ({
   message,
   isVisible,
   onClose,
-  duration = 3000
+  duration = 3000,
+  variant = "success",
 }) => {
   const [isAnimating, setIsAnimating] = useState(false)
 
@@ -80,7 +82,7 @@ const ToastNotification: FC<ToastNotificationProps> = ({
         display="flex"
         alignItems="center"
         gap={2}
-        bgcolor="success.main"
+        bgcolor={variant === "error" ? "error.main" : "success.main"}
         color="white"
         px={3}
         py={2}

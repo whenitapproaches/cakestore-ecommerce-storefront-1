@@ -3,6 +3,7 @@ import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 // GLOBAL CUSTOM COMPONENT
 import { FlexRowCenter } from "components/flex-box";
+import { useTranslation } from "react-i18next";
 
 // ========================================================
 type Step = {
@@ -18,6 +19,7 @@ type Props = {
 // ========================================================
 
 export default function Stepper({ selectedStep = 1, stepperList, onChange }: Props) {
+  const { t } = useTranslation()
   const [selected, setSelected] = useState(selectedStep - 1);
 
   const handleStepClick = (step: Step, ind: number) => () => {
@@ -37,7 +39,7 @@ export default function Stepper({ selectedStep = 1, stepperList, onChange }: Pro
         <Fragment key={step.title}>
           <Chip
             disabled={step.disabled}
-            label={`${ind + 1}. ${step.title}`}
+            label={`${ind + 1}. ${t(step.title)}`}
             onClick={handleStepClick(step, ind)}
             sx={{
               backgroundColor: ind <= selected ? "primary.main" : "primary.light",

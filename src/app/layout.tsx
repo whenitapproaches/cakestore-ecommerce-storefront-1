@@ -16,6 +16,8 @@ import { ToastProvider } from "contexts/ToastContext";
 // GLOBAL CUSTOM COMPONENTS
 import RTL from "components/rtl";
 import ProgressBar from "components/progress";
+import Box from "@mui/material/Box";
+import Container from "@mui/material/Container";
 
 // IMPORT i18n SUPPORT FILE
 import "i18n";

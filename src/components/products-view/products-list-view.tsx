@@ -1,4 +1,5 @@
 import Pagination from "@mui/material/Pagination"
+import { useTranslation } from "react-i18next"
 // GLOBAL CUSTOM COMPONENTS
 import { Span } from "components/Typography"
 import FlexBetween from "components/flex-box/flex-between"
@@ -23,6 +24,9 @@ export default function ProductsListView({
   limit = 12,
   onPageChange 
 }: Props) {
+  const { t } = useTranslation()
+  const from = total === 0 ? 0 : (page - 1) * limit + 1
+  const to = Math.min(page * limit, total)
   return (
     <div>
       {products.map((item) => (
@@ -31,7 +35,7 @@ export default function ProductsListView({
 
       <FlexBetween flexWrap="wrap" mt={4}>
         <Span color="grey.600">
-          Showing {(page - 1) * limit + 1}-{Math.min(page * limit, total)} of {total} Products
+          {t("Showing {{from}}-{{to}} of {{total}} Products", { from, to, total })}
         </Span>
         <Pagination 
           count={Math.ceil(total / limit)} 

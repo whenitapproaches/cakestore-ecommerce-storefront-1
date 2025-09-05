@@ -11,9 +11,8 @@ const useCart = () => {
   // Enhanced add to cart that works with local state
   const addToCartEnhanced = useCallback(
     async (cartItem: any) => {
-      // First, try to sync with server cart API (POST /api/cart)
+      // Always use server cart API; do not fall back to local-only add
       const qtyToAdd = cartItem.qty || 1
-      let synced = false
       try {
         const res = await fetch("/api/cart", {
           method: "POST",
@@ -37,27 +36,25 @@ const useCart = () => {
               l?.productVariant?.featuredAsset?.preview ??
               l?.productVariant?.featuredAsset?.source,
             slug: l?.productVariant?.product?.slug ?? "",
+            stockLevel: l?.productVariant?.stockLevel,
           }))
           dispatch({ type: "SET_CART", payload: mapped })
-          synced = true
+          showToast(`${t("Added to Cart")}: ${cartItem.name}`, 2500, "success")
+          return true
         }
-      } catch {
-        // ignore network/server errors and fall back to local update
+        // API responded but not OK or missing lines
+        showToast(
+          t((data?.details?.message as string) || "Failed to add to cart"),
+          3000,
+          "error"
+        )
+        return false
+      } catch (e: any) {
+        // Network/server failure
+        const msg = e?.message || "Failed to add to cart"
+        showToast(t(msg), 3000, "error")
+        return false
       }
-
-      // Fallback/local optimistic update when server sync didn't occur
-      if (!synced) {
-        const existing = state.cart.find((item) => item.id === cartItem.id)
-        const nextItem = existing
-          ? { ...existing, qty: (existing.qty || 0) + qtyToAdd }
-          : { ...cartItem, qty: qtyToAdd }
-        dispatch({ type: "CHANGE_CART_AMOUNT", payload: nextItem })
-      }
-
-      // Show toast notification
-      showToast(`${t("Added to Cart")}: ${cartItem.name}`, 2500)
-
-      return true
     },
     [state.cart, dispatch, showToast]
   )
@@ -67,8 +64,10 @@ const useCart = () => {
     async (item: { id: string | number; orderLineId?: string }) => {
       try {
         if (item.orderLineId) {
-          const res = await fetch(`/api/cart?orderLineId=${encodeURIComponent(String(item.orderLineId))}`,
-            { method: "DELETE", credentials: "include" })
+          const res = await fetch(
+            `/api/cart?orderLineId=${encodeURIComponent(String(item.orderLineId))}`,
+            { method: "DELETE", credentials: "include" }
+          )
           const data = await res.json()
           if (res.ok && data?.cart?.lines) {
             const mapped = data.cart.lines.map((l: any) => ({
@@ -82,17 +81,21 @@ const useCart = () => {
                 l?.productVariant?.featuredAsset?.preview ??
                 l?.productVariant?.featuredAsset?.source,
               slug: l?.productVariant?.product?.slug ?? "",
+              stockLevel: l?.productVariant?.stockLevel,
             }))
             dispatch({ type: "SET_CART", payload: mapped })
-            return
+            return true
           }
+          showToast(t((data?.details?.message as string) || "Failed to remove cart item"), 3000, "error")
+          return false
         }
-      } catch {}
-      // fallback - remove locally if API fails
-      dispatch({
-        type: "CHANGE_CART_AMOUNT",
-        payload: { id: item.id, qty: 0, name: "", slug: "", price: 0 },
-      })
+        showToast(t("Failed to remove cart item"), 3000, "error")
+        return false
+      } catch (e: any) {
+        const msg = e?.message || "Failed to remove cart item"
+        showToast(t(msg), 3000, "error")
+        return false
+      }
     },
     [dispatch]
   )
@@ -101,7 +104,7 @@ const useCart = () => {
   const updateItemQuantity = useCallback(
     async (itemId: string | number, quantity: number) => {
       const existingItem = state.cart.find((item) => item.id === itemId)
-      if (!existingItem) return
+      if (!existingItem) return false
 
       try {
         if (existingItem.orderLineId) {
@@ -109,7 +112,10 @@ const useCart = () => {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
-            body: JSON.stringify({ orderLineId: String(existingItem.orderLineId), quantity }),
+            body: JSON.stringify({
+              orderLineId: String(existingItem.orderLineId),
+              quantity,
+            }),
           })
           const data = await res.json()
           if (res.ok && data?.cart?.lines) {
@@ -124,18 +130,21 @@ const useCart = () => {
                 l?.productVariant?.featuredAsset?.preview ??
                 l?.productVariant?.featuredAsset?.source,
               slug: l?.productVariant?.product?.slug ?? "",
+              stockLevel: l?.productVariant?.stockLevel,
             }))
             dispatch({ type: "SET_CART", payload: mapped })
-            return
+            return true
           }
+          showToast(t((data?.details?.message as string) || "Failed to update cart"), 3000, "error")
+          return false
         }
-      } catch {}
-
-      // fallback local update
-      dispatch({
-        type: "CHANGE_CART_AMOUNT",
-        payload: { ...existingItem, qty: quantity },
-      })
+        showToast(t("Failed to update cart"), 3000, "error")
+        return false
+      } catch (e: any) {
+        const msg = e?.message || "Failed to update cart"
+        showToast(t(msg), 3000, "error")
+        return false
+      }
     },
     [state.cart, dispatch]
   )

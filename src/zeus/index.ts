@@ -2837,6 +2837,13 @@ by the search, and in what quantity. */
     available: boolean | `@${string}`
     variants: ValueTypes["ProductVariant"]
   }>
+  ["StoreSettings"]: AliasType<{
+    id?: boolean | `@${string}`
+    key?: boolean | `@${string}`
+    value?: boolean | `@${string}`
+    createdAt?: boolean | `@${string}`
+    __typename?: boolean | `@${string}`
+  }>
   /** The price of a search result product, either as a range or as a single price */
   ["SearchResultPrice"]: AliasType<{
     ["...on PriceRange"]: ValueTypes["PriceRange"]

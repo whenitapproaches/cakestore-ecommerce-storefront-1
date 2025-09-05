@@ -1,4 +1,5 @@
 import { Fragment } from "react";
+import { useTranslation } from "react-i18next";
 import Grid from "@mui/material/Grid";
 import Pagination from "@mui/material/Pagination";
 // GLOBAL CUSTOM COMPONENTS
@@ -25,6 +26,9 @@ export default function ProductsGridView({
   limit = 12,
   onPageChange 
 }: Props) {
+  const { t } = useTranslation();
+  const from = total === 0 ? 0 : (page - 1) * limit + 1;
+  const to = Math.min(page * limit, total);
   return (
     <Fragment>
       <Grid container spacing={8}>
@@ -37,7 +41,7 @@ export default function ProductsGridView({
 
       <FlexBetween flexWrap="wrap" mt={6}>
         <Span color="grey.600">
-          Showing {(page - 1) * limit + 1}-{Math.min(page * limit, total)} of {total} Products
+          {t("Showing {{from}}-{{to}} of {{total}} Products", { from, to, total })}
         </Span>
         <Pagination 
           count={Math.ceil(total / limit)} 
