@@ -58,7 +58,7 @@ export default function MobileHeader() {
       <Drawer open={searchBarOpen} anchor="top" onClose={toggleSearchBar} sx={{ zIndex: 9999 }}>
         <Box width="auto" padding={2} height="100vh">
           <FlexBetween mb={1}>
-            <Paragraph>Search to Bazaar</Paragraph>
+            <Paragraph></Paragraph>
 
             <IconButton onClick={toggleSearchBar}>
               <Clear />

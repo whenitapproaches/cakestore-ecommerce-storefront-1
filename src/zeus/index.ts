@@ -1104,7 +1104,7 @@ query will once again return `null`. */
     ],
     storeSettings?: [
       { keys?: string[] },
-      ValueTypes["StoreSettingsList"],
+      ValueTypes["StoreSettings"],
     ]
   }>
   ["Mutation"]: AliasType<{
@@ -2770,11 +2770,6 @@ and refund calculations. */
     totalItems?: boolean | `@${string}`
     facetValues?: ValueTypes["FacetValueResult"]
     collections?: ValueTypes["CollectionResult"]
-    __typename?: boolean | `@${string}`
-  }>
-  ["StoreSettingsList"]: AliasType<{
-    items?: ValueTypes["StoreSettings"]
-    totalItems?: boolean | `@${string}`
     __typename?: boolean | `@${string}`
   }>
   /** Which FacetValues are present in the products returned

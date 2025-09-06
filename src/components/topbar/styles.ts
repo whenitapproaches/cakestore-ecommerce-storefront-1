@@ -41,10 +41,6 @@ export const StyledContainer = styled(Container)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
-  [theme.breakpoints.down("sm")]: {
-    alignItems: "start",
-    flexDirection: "column"
-  }
 }));
 
 export const StyledChip = styled(Chip)(({ theme }) => ({

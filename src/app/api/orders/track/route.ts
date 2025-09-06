@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { HttpStatusCode } from "axios"
-import crypto from "crypto"
+import jwt from "jsonwebtoken"
 
 // Cloudflare Turnstile verify endpoint
 const TURNSTILE_VERIFY_URL =
@@ -11,9 +11,15 @@ type VerifyResponse = {
   "error-codes"?: string[]
 }
 
+type OrderTokenPayload = {
+  orderCode: string
+  iat: number
+  exp: number
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { code, token } = await req.json()
+    const { code, token: captchaToken } = await req.json()
 
     if (!code || typeof code !== "string") {
       return NextResponse.json(
@@ -22,7 +28,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    if (!token || typeof token !== "string") {
+    if (!captchaToken || typeof captchaToken !== "string") {
       return NextResponse.json(
         { error: "Missing captcha token" },
         { status: HttpStatusCode.BadRequest }
@@ -40,7 +46,7 @@ export async function POST(req: NextRequest) {
     // Verify captcha server-side
     const verifyForm = new URLSearchParams()
     verifyForm.append("secret", secret)
-    verifyForm.append("response", token)
+    verifyForm.append("response", captchaToken)
     verifyForm.append("remoteip", req.ip ?? "")
 
     const verifyRes = await fetch(TURNSTILE_VERIFY_URL, {
@@ -57,28 +63,29 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // If captcha passed, create a short-lived token and redirect to /orders/[code]
+    // If captcha passed, create a JWT token and redirect to /orders/[code]
     const origin =
       req.headers.get("x-url-origin") || req.headers.get("origin") || ""
 
-    const redirectSecret = process.env.ORDER_REDIRECT_SECRET
-    if (!redirectSecret) {
+    const jwtSecret = process.env.ORDER_REDIRECT_SECRET
+    if (!jwtSecret) {
       return NextResponse.json(
         { error: "Order redirect not configured" },
         { status: HttpStatusCode.InternalServerError }
       )
     }
 
-    const exp = Math.floor(Date.now() / 1000) + 5 * 60
-    const payload = `${code}.${exp}`
-    const sig = crypto
-      .createHmac("sha256", redirectSecret)
-      .update(payload)
-      .digest("hex")
-    const signed = `${payload}.${sig}`
+    // Create JWT payload with order code
+    const jwtPayload: OrderTokenPayload = {
+      orderCode: code,
+      iat: Math.floor(Date.now() / 1000),
+      exp: Math.floor(Date.now() / 1000) + 30 * 60, // 30 minutes
+    }
 
-    const url = new URL(`${origin}/orders/${encodeURIComponent(code)}`)
-    url.searchParams.set("token", signed)
+    const jwtToken = jwt.sign(jwtPayload, jwtSecret, { algorithm: "HS256" })
+
+    const url = new URL(`${origin}/orders/code/${encodeURIComponent(code)}`)
+    url.searchParams.set("token", jwtToken)
 
     // If the request expects HTML, redirect; otherwise return JSON for fetch()
     const accept = req.headers.get("accept") || ""

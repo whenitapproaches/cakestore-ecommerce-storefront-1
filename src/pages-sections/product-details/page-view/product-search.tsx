@@ -32,6 +32,7 @@ import {
 import Product from "models/Product.model"
 import { useTranslation } from "react-i18next"
 import { formatCurrency } from "lib"
+import { upperFirst } from "lodash"
 
 const SORT_OPTIONS = [
   { key: "date", value: "date" },
@@ -256,7 +257,7 @@ export default function ProductSearchPageView({
                 size="small"
                 value={sortBy}
                 variant="outlined"
-                placeholder="Sort by"
+                placeholder={t("Sort by")}
                 onChange={(e) => handleChangeSortBy(e.target.value)}
                 sx={{ flex: "1 1 0", minWidth: "150px" }}
               >
@@ -359,9 +360,11 @@ export default function ProductSearchPageView({
               variant="outlined"
               label={(() => {
                 const [min, max] = filters.price
-                if (filters.price.length === 1) return `${t("Price")}: ${formatCurrency(min, true)}+`
+                if (filters.price.length === 1)
+                  return `${t("Price")}: ${upperFirst(t("above"))} ${formatCurrency(min, true)}`
                 if (filters.price.length === 2) {
-                  if (min === 0) return `${t("Price")}: < ${formatCurrency(max, true)}`
+                  if (min === 0)
+                    return `${t("Price")}: ${upperFirst(t("below"))} ${formatCurrency(max, true)}`
                   return `${t("Price")}: ${formatCurrency(min, true)} - ${formatCurrency(max, true)}`
                 }
                 return `${t("Price")}`
@@ -395,7 +398,7 @@ export default function ProductSearchPageView({
                     return {
                       id: `gte-${min}`,
                       min,
-                      label: `${formatCurrency(min, true)}+`,
+                      label: `${upperFirst(t("above"))} ${formatCurrency(min, true)}`,
                     }
                   }
 
@@ -406,7 +409,7 @@ export default function ProductSearchPageView({
                       id: `lt-${max}`,
                       min: 0,
                       max,
-                      label: `< ${formatCurrency(max, true)}`,
+                      label: `${upperFirst(t("below"))} ${formatCurrency(max, true)}`,
                     }
                   }
 

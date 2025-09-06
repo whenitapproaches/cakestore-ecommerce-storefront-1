@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 
 // Base API configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001'
 
 // Default headers for API requests
 const DEFAULT_HEADERS = {
@@ -251,6 +251,20 @@ export const ordersApi = {
   
   // Delete order
   delete: (id: string) => api.delete(`/api/orders/${id}`),
+
+  // Place order (set customer, addresses, transition state)
+  place: (payload: {
+    emailAddress: string
+    firstName: string
+    lastName: string
+    phoneNumber: string
+    shipping: {
+      address1: string
+      province: any
+      district: any
+      ward: any
+    }
+  }) => api.post('/api/orders/place', payload),
 }
 
 // Shipping-related endpoints under orders

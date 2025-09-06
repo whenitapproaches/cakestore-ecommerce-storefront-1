@@ -36,9 +36,6 @@ export default function Header({ isFixed, className, midSlot }: Props) {
         <Link href="/">
           <LazyImage src={require("../../../public/assets/images/logo2.svg")} alt="logo" />
         </Link>
-
-        {/* SHOW DROP DOWN CATEGORY BUTTON WHEN HEADER FIXED */}
-        {isFixed ? <CategoriesMenu /> : null}
       </FlexBox>
 
       {/* SEARCH FORM | NAVIGATION */}

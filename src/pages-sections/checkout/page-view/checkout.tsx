@@ -21,6 +21,11 @@ export default function CheckoutPageView() {
       try {
         const { data } = await cartApi.getActive();
         const lines: any[] = Array.isArray(data?.cart?.lines) ? data.cart.lines : [];
+        if (!lines.length) {
+          showToast(t("Please add items to cart before checkout"), 3000, "error");
+          router.push("/shop");
+          return;
+        }
         const outOfStock = lines.find((l: any) => {
           const level = String(l?.productVariant?.stockLevel || "");
           return level === "OUT_OF_STOCK";

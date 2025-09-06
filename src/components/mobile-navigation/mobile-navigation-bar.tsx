@@ -11,12 +11,13 @@ import ShoppingBagOutlined from "icons/ShoppingBagOutlined";
 import useCart from "hooks/useCart";
 // STYLED COMPONENTS
 import { iconStyle, StyledNavLink, Wrapper } from "./styles";
+import { useTranslation } from "react-i18next";
 
 export default function MobileNavigationBar() {
   const { getCartItemCount } = useCart();
   const itemCount = getCartItemCount();
   const DOWN_900 = useMediaQuery((theme: Theme) => theme.breakpoints.down(900));
-
+  const { t } = useTranslation();
   if (DOWN_900) {
     return (
       <Wrapper>
@@ -30,7 +31,7 @@ export default function MobileNavigationBar() {
               <Icon sx={iconStyle} fontSize="small" />
             )}
 
-            {title}
+            {t(title)}
           </StyledNavLink>
         ))}
       </Wrapper>
@@ -41,8 +42,6 @@ export default function MobileNavigationBar() {
 }
 
 const list = [
-  { title: "Home", Icon: Home, href: "/" },
-  { title: "Category", Icon: CategoryOutlined, href: "/mobile-category-nav" },
+  { title: "Shop", Icon: Home, href: "/shop" },
   { title: "Cart", Icon: ShoppingBagOutlined, href: "/cart" },
-  // Account removed for guest-only shop
 ];

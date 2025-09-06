@@ -27,7 +27,7 @@ export default function NavigationList() {
           return (
             <MegaMenu
               key={nav.title}
-              title={nav.title}
+              title={t(nav.title)}
               menuList={nav.child as any}
             />
           )
@@ -38,7 +38,7 @@ export default function NavigationList() {
           return (
             <CategoryBasedMenu
               key={nav.title}
-              title={nav.title}
+              title={t(nav.title)}
               menuList={nav.child as any}
             />
           )
@@ -64,7 +64,7 @@ export default function NavigationList() {
               }}
             >
               <FlexBox alignItems="flex-end" gap={0.3} sx={NAV_LINK_STYLES}>
-                {nav.title}{" "}
+                {t(nav.title)}{" "}
                 <KeyboardArrowDown
                   sx={{ color: "grey.500", fontSize: "1.1rem" }}
                 />
@@ -85,7 +85,7 @@ export default function NavigationList() {
         if (nav.url) {
           return (
             <NavLink href={nav.url} key={nav.title}>
-              <MenuItem>{nav.title}</MenuItem>
+              <MenuItem>{t(nav.title)}</MenuItem>
             </NavLink>
           )
         }

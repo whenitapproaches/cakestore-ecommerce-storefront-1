@@ -6,12 +6,15 @@ import LogoSection from "./components/logo"
 import AboutLinks from "./components/about-links"
 import SocialLinks from "./components/social-links"
 import CustomerCareLinks from "./components/customer-care-links"
+import HotlineInfo from "./components/hotline-info"
 // GLOBAL CUSTOM COMPONENTS
 import { Paragraph } from "components/Typography"
 // STYLED COMPONENTS
 import { Heading } from "./styles"
+import { useTranslation } from "react-i18next";
 
 export default function Footer1() {
+  const { t } = useTranslation();
   return (
     <Box component="footer" bgcolor="#222935" mb={{ sm: 0, xs: 7 }}>
       <Box
@@ -38,22 +41,13 @@ export default function Footer1() {
           {/* CONTACT & SOCIAL LINKS */}
           <Grid item lg={3} md={6} sm={6} xs={12}>
             {/* CONTACT INFORMATION */}
-            <Heading>Contact Us</Heading>
-
-            <Paragraph py={0.6} color="grey.500">
-              70 Washington Square South, New York, NY 10012, United States
-            </Paragraph>
-
-            <Paragraph py={0.6} color="grey.500">
-              Email: uilib.help@gmail.com
-            </Paragraph>
-
-            <Paragraph py={0.6} mb={2} color="grey.500">
-              Phone: +1 1123 456 780
-            </Paragraph>
+            <Heading>{t("Contact Us")}</Heading>
 
             {/* SOCIAL LINKS WITH ICON */}
             <SocialLinks />
+
+            {/* HOTLINE INFORMATION */}
+            <HotlineInfo />
           </Grid>
         </Grid>
       </Box>

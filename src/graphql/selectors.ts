@@ -479,6 +479,47 @@ export const OrderMaskedSelector = Selector("Order")({
   total: true,
   totalWithTax: true,
   customFields: true,
+  customer: {
+    firstName: true,
+    lastName: true,
+    phoneNumber: true,
+    emailAddress: true,
+  },
+  shippingAddress: {
+    fullName: true,
+    streetLine1: true,
+    city: true,
+    province: true,
+    phoneNumber: true,
+  },
+  lines: {
+    id: true,
+    quantity: true,
+    linePriceWithTax: true,
+    unitPriceWithTax: true,
+    discountedLinePriceWithTax: true,
+    proratedUnitPriceWithTax: true,
+    productVariant: {
+      name: true,
+      product: {
+        name: true,
+        slug: true,
+        featuredAsset: {
+          preview: true,
+        },
+      },
+      featuredAsset: {
+        preview: true,
+      },
+    }
+  },
+  history: {
+    items: {
+      createdAt: true,
+      type: true,
+      data: true,
+    }
+  }
 })
 
 export type OrderMaskedType = FromSelector<
@@ -499,6 +540,7 @@ export const OrderSelector = Selector("Order")({
   payments: paymentSelector,
   currencyCode: true,
   shippingLines: shippingLineSelector,
+  orderPlacedAt: true,
   lines: {
     id: true,
     quantity: true,

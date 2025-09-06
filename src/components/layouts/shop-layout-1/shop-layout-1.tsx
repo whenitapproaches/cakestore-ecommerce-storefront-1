@@ -1,14 +1,14 @@
-"use client";
+"use client"
 
-import { Fragment, PropsWithChildren, useCallback, useState } from "react";
+import { Fragment, PropsWithChildren, useCallback, useState } from "react"
 // GLOBAL CUSTOM COMPONENTS
-import Sticky from "components/sticky";
-import Topbar from "components/topbar";
-import { Navbar } from "components/navbar";
-import { Footer1 } from "components/footer";
-import Header from "components/header/header";
-import { SearchInputWithCategory } from "components/search-box";
-import { MobileNavigationBar } from "components/mobile-navigation";
+import Sticky from "components/sticky"
+import Topbar from "components/topbar"
+import { Navbar } from "components/navbar"
+import { Footer1 } from "components/footer"
+import Header from "components/header/header"
+import { SearchInputWithCategory } from "components/search-box"
+import { MobileNavigationBar } from "components/mobile-navigation"
 
 /**
  *  USED IN:
@@ -18,12 +18,11 @@ import { MobileNavigationBar } from "components/mobile-navigation";
  */
 
 export default function ShopLayout1({ children }: PropsWithChildren) {
-  const [isFixed, setIsFixed] = useState(false);
-  const toggleIsFixed = useCallback((fixed: boolean) => setIsFixed(fixed), []);
+  const [isFixed, setIsFixed] = useState(false)
+  const toggleIsFixed = useCallback((fixed: boolean) => setIsFixed(fixed), [])
 
   return (
     <Fragment>
-      {/* TOP BAR SECTION */}
       <Topbar />
 
       {/* HEADER */}
@@ -32,7 +31,7 @@ export default function ShopLayout1({ children }: PropsWithChildren) {
       </Sticky>
 
       {/* NAVIGATION BAR */}
-      <Navbar elevation={0} border={1} hideCategories />
+      <Navbar elevation={0} border={1} />
 
       {/* BODY CONTENT */}
       {children}
@@ -43,5 +42,5 @@ export default function ShopLayout1({ children }: PropsWithChildren) {
       {/* FOOTER */}
       <Footer1 />
     </Fragment>
-  );
+  )
 }

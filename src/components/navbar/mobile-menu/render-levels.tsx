@@ -5,6 +5,7 @@ import ExpandMore from "@mui/icons-material/ExpandMore";
 // GLOBAL CUSTOM COMPONENTS
 import { H6 } from "components/Typography";
 import { NavLink } from "components/nav-link";
+import { useTranslation } from "react-i18next";
 
 const ACCORDION_STYLES = {
   "&:not(:last-child)": { borderBottom: 0 },
@@ -23,6 +24,8 @@ const ACCORDION_SUMMARY_STYLES = {
 };
 
 export const renderLevels = (data: any[], handleClose: () => void) => {
+  const { t } = useTranslation()
+
   return data.map((item: any, index: number) => {
     if (item.child) {
       return (
@@ -39,7 +42,7 @@ export const renderLevels = (data: any[], handleClose: () => void) => {
     if (item.extLink) {
       return (
         <H6 key={index} py={1}>
-          <NavLink href={item.url}>{item.title}</NavLink>
+          <NavLink href={item.url}>{t(item.title)}</NavLink>
         </H6>
       );
     }
@@ -47,7 +50,7 @@ export const renderLevels = (data: any[], handleClose: () => void) => {
     return (
       <Box key={index} py={1}>
         <NavLink href={item.url} onClick={handleClose}>
-          {item.title}
+          {t(item.title)}
         </NavLink>
       </Box>
     );

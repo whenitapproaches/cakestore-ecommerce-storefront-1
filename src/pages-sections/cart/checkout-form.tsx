@@ -50,6 +50,7 @@ export default function CheckoutForm() {
   const getTotalPrice = () =>
     state.cart.reduce((acc, item) => acc + item.price * item.qty, 0)
   const subtotal = useMemo(() => getTotalPrice(), [state.cart])
+  const itemCount = useMemo(() => state.cart.reduce((c, i) => c + i.qty, 0), [state.cart])
   const cartSignature = useMemo(
     () =>
       state.cart
@@ -309,9 +310,13 @@ export default function CheckoutForm() {
         fullWidth
         color="primary"
         variant="contained"
-        disabled={isApplying}
+        disabled={isApplying || itemCount === 0}
         onClick={async () => {
           try {
+            if (itemCount === 0) {
+              showToast(t("Please add items to cart before checkout"), 3000, "error")
+              return
+            }
             const { data } = await cartApi.getActive()
             const lines: any[] = Array.isArray(data?.cart?.lines) ? data.cart.lines : []
             const out = lines.find((l: any) => String(l?.productVariant?.stockLevel || "") === "OUT_OF_STOCK")

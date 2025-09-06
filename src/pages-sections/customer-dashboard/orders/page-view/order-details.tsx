@@ -1,38 +1,47 @@
-"use client";
+"use client"
 
-import { Fragment } from "react";
-import ShoppingBag from "@mui/icons-material/ShoppingBag";
+import { Fragment } from "react"
+import ShoppingBag from "@mui/icons-material/ShoppingBag"
 // Local CUSTOM COMPONENTS
-import OrderSummery from "../order-summery";
-import OrderProgress from "../order-progress";
-import OrderedProducts from "../ordered-products";
-import DashboardHeader from "../../dashboard-header";
-// CUSTOM DATA MODEL
-import Order from "models/Order.model";
+import OrderSummery from "../order-summery"
+import OrderProgress from "../order-progress"
+import OrderedProducts from "../ordered-products"
+import DashboardHeader from "../../dashboard-header"
+import OrderNotes from "../order-notes"
+import OrderPayment from "../order-payment"
+import Order from "models/Order.model"
+import { Grid } from "@mui/material"
 
 // =============================================================
-type Props = { order: Order };
+type Props = {
+  order: Order
+  qrImageUrl?: string | null
+  qrImageUrl2?: string | null
+}
 // =============================================================
 
-export default function OrderDetailsPageView({ order }: Props) {
+export default function OrderDetailsPageView({
+  order,
+  qrImageUrl,
+  qrImageUrl2,
+}: Props) {
   return (
     <Fragment>
-      {/* TITLE HEADER AREA */}
-      <DashboardHeader
-        href="/orders"
-        Icon={ShoppingBag}
-        title="Order Details"
-        buttonText="Order Again"
-      />
-
-      {/* ORDER PROGRESS AREA */}
-      <OrderProgress />
-
-      {/* ORDERED PRODUCT LIST */}
-      <OrderedProducts order={order} />
-
-      {/* SHIPPING AND ORDER SUMMERY */}
-      <OrderSummery order={order} />
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={8}>
+          <OrderedProducts order={order} />
+          <OrderPayment
+            order={order}
+            qrImageUrl={qrImageUrl}
+            qrImageUrl2={qrImageUrl2}
+          />
+          <OrderNotes order={order} />
+          <OrderSummery order={order} />
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <OrderProgress order={order} />
+        </Grid>
+      </Grid>
     </Fragment>
-  );
+  )
 }

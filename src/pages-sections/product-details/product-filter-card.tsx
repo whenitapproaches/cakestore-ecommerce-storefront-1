@@ -18,6 +18,7 @@ import AccordionHeader from "components/accordion/accordion-header"
 // TYPE
 import { ProductFilterKeys, ProductFilterValues, ProductFilters } from "./types"
 import { Slider, RadioGroup, FormControlLabel, Radio } from "@mui/material"
+import { useTranslation } from "react-i18next"
 
 // ============================================================================
 interface Props {
@@ -32,6 +33,7 @@ export default function ProductFilterCard({
   changeFilters,
   priceOptions = [],
 }: Props) {
+  const { t } = useTranslation()
   const [collapsed, setCollapsed] = useState(true)
 
   const handleChangePrice = (values: number[]) => {
@@ -66,18 +68,14 @@ export default function ProductFilterCard({
     changeFilters("rating", value)
   }
 
-  console.log(priceOptions)
-
   return (
     <div>
       {/* PRICE VARIANT FILTER (Radio from store settings) */}
-      <H6 mb={2}>Price Range</H6>
+      <H6 mb={2}>{t("Price Range")}</H6>
       {priceOptions.length ? (
         <RadioGroup
           value={(() => {
             const [min, max] = filters.price
-
-            console.log(filters.price)
 
             if (filters.price?.length === 1) return `gte-${min}`
             if (filters.price?.length === 2) {
@@ -116,12 +114,14 @@ export default function ProductFilterCard({
                     : `range-${opt.min}-${opt.max}`
               }
               control={<Radio size="small" />}
-              label={opt.label}
+              label={t(opt.label)}
             />
           ))}
         </RadioGroup>
       ) : (
-        <Paragraph color="grey.600">No price options configured.</Paragraph>
+        <Paragraph color="grey.600">
+          {t("No price options configured.")}
+        </Paragraph>
       )}
     </div>
   )

@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url)
 
     // support comma or pipe separated keys, default to price-filter
-    const keysParam = searchParams.get("keys")?.split(",") || ["price-filter"]
+    const keysParam = searchParams.get("keys")?.split("|") || ["price-filter"]
 
     const api = storefrontApiQuery(ctx.params)
 

@@ -1,34 +1,26 @@
 // LOCAL CUSTOM COMPONENTS
-import Categories from "./categories";
-import NavigationList from "./nav-list";
+import Categories from "./categories"
+import NavigationList from "./nav-list"
 // STYLED COMPONENTS
-import { NavBarWrapper, InnerContainer } from "./styles";
+import { NavBarWrapper, InnerContainer } from "./styles"
 // DATA TYPES
 
 // ==========================================================
 interface Props {
-  border?: number;
-  elevation?: number;
-  hideCategories?: boolean;
+  border?: number
+  elevation?: number
 }
 // ==========================================================
 
-export default function Navbar({ border, elevation = 2, hideCategories = false }: Props) {
+export default function Navbar({
+  border,
+  elevation = 2,
+}: Props) {
   return (
     <NavBarWrapper hoverEffect={false} elevation={elevation} border={border}>
-      {hideCategories ? (
-        <InnerContainer sx={{ justifyContent: "center" }}>
-          <NavigationList />
-        </InnerContainer>
-      ) : (
-        <InnerContainer>
-          {/* CATEGORY MEGA MENU */}
-          <Categories />
-
-          {/* HORIZONTAL MENU */}
-          <NavigationList />
-        </InnerContainer>
-      )}
+      <InnerContainer sx={{ justifyContent: "center" }}>
+        <NavigationList />
+      </InnerContainer>
     </NavBarWrapper>
-  );
+  )
 }

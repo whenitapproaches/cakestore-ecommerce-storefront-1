@@ -40,9 +40,6 @@ const apiFetchVendure =
       query = query.replace('"DESC"', 'DESC').replace('"ASC"', 'ASC')
     }
 
-    // TODO: turn this off
-    console.log(query)
-
     const buildAuthHeaders = async (): Promise<Record<string, string>> => {
       // Prefer token from incoming headers or request cookies on the server; avoid module state on server
       if (typeof window === "undefined") {

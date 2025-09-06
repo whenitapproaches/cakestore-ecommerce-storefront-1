@@ -36,9 +36,9 @@ export default function SearchInput() {
           color="primary"
           disableElevation
           variant="contained"
-          sx={{ px: "3rem", height: "100%", borderRadius: "0 4px 4px 0" }}
+          sx={{ px: "3rem", height: "100%", borderRadius: "0 4px 4px 0", whiteSpace: "nowrap" }}
         >
-          Search
+          {t("Search")}
         </Button>
       </Box>
     ),

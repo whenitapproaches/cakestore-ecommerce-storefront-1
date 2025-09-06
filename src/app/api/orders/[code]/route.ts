@@ -3,59 +3,54 @@ import { storefrontApiQuery } from "graphql/client"
 import { getContext } from "lib/getStatic"
 import { OrderMaskedSelector, StoreSettingsSelector } from "graphql/selectors"
 import { HttpStatusCode } from "axios"
-import crypto from "crypto"
+import jwt from "jsonwebtoken"
+import { storeSettingsApi } from "lib/api"
+
+type OrderTokenPayload = {
+  orderCode: string
+  iat: number
+  exp: number
+}
 
 export async function GET(
   req: NextRequest,
   { params }: { params: { code: string } }
 ) {
   try {
-    // Verify token query parameter
+    // Verify JWT token query parameter
     const token = req.nextUrl.searchParams.get("token")
-    const redirectSecret = process.env.ORDER_REDIRECT_SECRET
-    if (!token || !redirectSecret) {
+    const jwtSecret = process.env.ORDER_REDIRECT_SECRET
+    if (!token || !jwtSecret) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: HttpStatusCode.Unauthorized }
       )
     }
 
-    const [codePart, expPart, sig] = token.split(".")
-    if (!codePart || !expPart || !sig) {
+    // Verify and decode JWT token
+    let decoded: OrderTokenPayload
+    try {
+      decoded = jwt.verify(token, jwtSecret, {
+        algorithms: ["HS256"],
+      }) as OrderTokenPayload
+    } catch (jwtError: any) {
+      const errorMessage =
+        jwtError.name === "TokenExpiredError"
+          ? "Token expired"
+          : "Invalid token"
       return NextResponse.json(
-        { error: "Invalid token" },
+        { error: errorMessage },
         { status: HttpStatusCode.Unauthorized }
       )
     }
-    const exp = parseInt(expPart, 10)
-    if (!Number.isFinite(exp) || Math.floor(Date.now() / 1000) > exp) {
-      return NextResponse.json(
-        { error: "Token expired" },
-        { status: HttpStatusCode.Unauthorized }
-      )
-    }
-    const payload = `${codePart}.${expPart}`
-    const expectedSig = crypto
-      .createHmac("sha256", redirectSecret)
-      .update(payload)
-      .digest("hex")
 
-    // Constant-time compare without relying on Node types
-    const a = Uint8Array.from(Buffer.from(sig, "hex"))
-    const b = Uint8Array.from(Buffer.from(expectedSig, "hex"))
-    if (a.length !== b.length) {
+    const code = params.code
+    const tokenOrderCode = decoded.orderCode
+
+    // Verify that the order code in the URL matches the one in the JWT payload
+    if (code !== tokenOrderCode) {
       return NextResponse.json(
-        { error: "Invalid signature" },
-        { status: HttpStatusCode.Unauthorized }
-      )
-    }
-    let diff = 0
-    for (let i = 0; i < a.length; i++) {
-      diff |= a[i] ^ b[i]
-    }
-    if (diff !== 0) {
-      return NextResponse.json(
-        { error: "Invalid signature" },
+        { error: "Invalid token for this order" },
         { status: HttpStatusCode.Unauthorized }
       )
     }
@@ -63,17 +58,24 @@ export async function GET(
     const ctx = getContext()
     const api = storefrontApiQuery(ctx.params)
 
-    const code = params.code
-    if (code !== codePart) {
-      return NextResponse.json(
-        { error: "Invalid token for code" },
-        { status: HttpStatusCode.Unauthorized }
-      )
-    }
-
     // Fetch masked order by code
     const data = await (api as any)({
-      orderByCodeMasked: [{ code }, OrderMaskedSelector as any],
+      orderByCodeMasked: [
+        { code },
+        {
+          ...OrderMaskedSelector,
+          history: [
+            {
+              options: {
+                filter: {
+                  type: { in: ["ORDER_STATE_TRANSITION", "ORDER_NOTE"] },
+                },
+              },
+            },
+            OrderMaskedSelector.history as any,
+          ],
+        } as any,
+      ],
     })
 
     const order = (data as any)?.orderByCodeMasked
@@ -87,7 +89,9 @@ export async function GET(
 
     // Determine if order payment is completed (any payment settled)
     const isPaid = Array.isArray(order.payments)
-      ? order.payments.some((p: any) => (p?.state || "").toLowerCase() === "settled")
+      ? order.payments.some(
+          (p: any) => (p?.state || "").toLowerCase() === "settled"
+        )
       : false
 
     let qrImageUrl: string | null = null
@@ -98,7 +102,7 @@ export async function GET(
       const settingsData = await api({
         storeSettings: [
           { keys: ["banking-qr", "banking-qr-2"] },
-          { items: StoreSettingsSelector, totalItems: true },
+          StoreSettingsSelector,
         ],
       })
 
@@ -114,7 +118,10 @@ export async function GET(
         try {
           const u = new URL(base)
           u.searchParams.set("addInfo", order.code)
-          u.searchParams.set("amount", String(order.totalWithTax))
+          u.searchParams.set(
+            "amount",
+            String(order.totalWithTax / Math.pow(10, 2))
+          )
           return u.toString()
         } catch (_) {
           return null
@@ -143,4 +150,3 @@ export async function GET(
     )
   }
 }
-

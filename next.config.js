@@ -6,6 +6,7 @@ const nextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "ui-lib.com" },
       { hostname: "localhost", port: "3000" },
+      { hostname: "img.vietqr.io" },
     ],
   },
 }

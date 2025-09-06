@@ -56,6 +56,9 @@ importers:
       date-fns:
         specifier: ^3.3.1
         version: 3.6.0
+      dvhcvn:
+        specifier: ^1.2.20250301
+        version: 1.2.20250301
       formik:
         specifier: ^2.4.5
         version: 2.4.6(@types/react@18.2.48)(react@18.3.1)
@@ -1249,6 +1252,9 @@ packages:
 
   duplexer2@0.1.4:
     resolution: {integrity: sha512-asLFVfWWtJ90ZyOUHMqk7/S2w2guQKxUI2itj3d92ADHhxUSbCMGi1f1cBcJ7xM1To+pE/Khbwo1yuNbMEPKeA==}
+
+  dvhcvn@1.2.20250301:
+    resolution: {integrity: sha512-3/RtQd15aI3INn141+5h5/kQrrd8rb9UlBp3jrMhGAVUsivP6inAbU7adk5NdZ/703Wj7ONCzLNkvkDdNajMvQ==}
 
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
@@ -3733,6 +3739,8 @@ snapshots:
   duplexer2@0.1.4:
     dependencies:
       readable-stream: 2.3.8
+
+  dvhcvn@1.2.20250301: {}
 
   eastasianwidth@0.2.0: {}
 

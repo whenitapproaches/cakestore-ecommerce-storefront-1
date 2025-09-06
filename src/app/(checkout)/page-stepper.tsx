@@ -9,9 +9,7 @@ import Stepper from "./stepper";
 
 const STEPPER_LIST = [
   { title: "Cart", disabled: false },
-  { title: "Details", disabled: false },
-  { title: "Payment", disabled: false },
-  { title: "Review", disabled: true }
+  { title: "Checkout", disabled: false },
 ];
 
 export default function PageStepper({ children }: PropsWithChildren) {
@@ -28,12 +26,6 @@ export default function PageStepper({ children }: PropsWithChildren) {
       case 1:
         router.push("/checkout");
         break;
-      case 2:
-        router.push("/payment");
-        break;
-      case 3:
-        router.push("/orders");
-        break;
       default:
         break;
     }
@@ -46,9 +38,6 @@ export default function PageStepper({ children }: PropsWithChildren) {
         break;
       case "/checkout":
         setSelectedStep(2);
-        break;
-      case "/payment":
-        setSelectedStep(3);
         break;
       default:
         break;
