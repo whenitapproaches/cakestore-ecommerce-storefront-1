@@ -7,8 +7,8 @@ import Menu from "@mui/icons-material/Menu";
 import Clear from "@mui/icons-material/Clear";
 // GLOBAL CUSTOM COMPONENT
 import Scrollbar from "components/scrollbar";
-// RENDER MENU LEVEL FUNCTION
-import { renderLevels } from "./render-levels";
+// RENDER MENU LEVEL COMPONENT
+import { RenderLevels } from "./render-levels";
 // NAVIGATION DATA LIST
 import { updateNavigation } from "./modified-navigation";
 
@@ -33,7 +33,7 @@ export default function MobileMenu() {
               </IconButton>
 
               {/* MULTI LEVEL MENU RENDER */}
-              {renderLevels(updateNavigation, handleClose)}
+              <RenderLevels data={updateNavigation} handleClose={handleClose} />
             </Box>
           </Scrollbar>
         </Box>

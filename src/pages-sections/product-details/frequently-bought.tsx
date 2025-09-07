@@ -38,8 +38,8 @@ export default function FrequentlyBought({ products }: Props) {
               key={item.id}
               slug={item.slug}
               price={item.price}
-              title={item.title}
-              imgUrl={item.thumbnail}
+              title={item.name}
+              imgUrl={item.featuredAsset?.preview || "/assets/images/products/Rectangle 116.png"}
             />
 
             {ind < products.length - 1 && (

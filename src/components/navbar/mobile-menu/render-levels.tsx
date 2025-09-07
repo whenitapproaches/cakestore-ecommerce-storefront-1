@@ -23,10 +23,12 @@ const ACCORDION_SUMMARY_STYLES = {
   },
 };
 
-export const renderLevels = (data: any[], handleClose: () => void) => {
+export const RenderLevels = ({ data, handleClose }: { data: any[], handleClose: () => void }) => {
   const { t } = useTranslation()
 
-  return data.map((item: any, index: number) => {
+  return (
+    <>
+      {data.map((item: any, index: number) => {
     if (item.child) {
       return (
         <Accordion square key={index} elevation={0} disableGutters sx={ACCORDION_STYLES}>
@@ -34,7 +36,7 @@ export const renderLevels = (data: any[], handleClose: () => void) => {
             <H6>{item.title}</H6>
           </AccordionSummary>
 
-          <Box mx={2}>{renderLevels(item.child, handleClose)}</Box>
+          <Box mx={2}><RenderLevels data={item.child} handleClose={handleClose} /></Box>
         </Accordion>
       );
     }
@@ -54,5 +56,7 @@ export const renderLevels = (data: any[], handleClose: () => void) => {
         </NavLink>
       </Box>
     );
-  });
+      })}
+    </>
+  );
 };

@@ -14,8 +14,6 @@ export async function GET() {
       eligibleShippingMethods: ShippingMethodsSelector,
     })
 
-    console.log(eligibleShippingMethods)
-
     const methods = (eligibleShippingMethods || []).map((m: any) => ({
       id: String(m.id),
       name: String(m.name),

@@ -14,8 +14,6 @@ interface Props {
 // ==============================================================
 
 export default function Error({ error, reset }: Props) {
-  console.log(error, error.message);
-
   return (
     <FlexRowCenter height="100vh">
       <Card sx={{ p: 4, textAlign: "center" }}>

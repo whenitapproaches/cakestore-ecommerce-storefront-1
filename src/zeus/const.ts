@@ -1327,13 +1327,6 @@ export const ReturnTypes: Record<string, any> = {
     available: "Boolean",
     variants: "ProductVariant",
   },
-  ProductVariant: {
-    id: "ID",
-    name: "String",
-    price: "Money",
-    currencyCode: "CurrencyCode",
-    stockOnHand: "Int",
-  },
   SearchResultPrice: {
     "...on PriceRange": "PriceRange",
     "...on SinglePrice": "SinglePrice",

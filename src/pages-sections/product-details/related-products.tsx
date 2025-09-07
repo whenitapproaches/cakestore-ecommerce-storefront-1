@@ -4,7 +4,7 @@ import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 // GLOBAL CUSTOM COMPONENTS
 import { H3 } from "components/Typography";
-import ProductCard1 from "components/product-cards/product-card-1";
+import ProductCard16 from "components/product-cards/product-card-16";
 // CUSTOM DATA MODEL
 import Product from "models/Product.model";
 
@@ -20,15 +20,8 @@ export default function RelatedProducts({ products }: Props) {
       <Grid container spacing={3}>
         {products.map((item, ind) => (
           <Grid item lg={3} md={4} sm={6} xs={12} key={ind}>
-            <ProductCard1
-              hoverEffect
-              id={item.id}
-              slug={item.slug}
-              title={item.title}
-              price={item.price}
-              rating={item.rating}
-              imgUrl={item.thumbnail}
-              discount={item.discount}
+            <ProductCard16
+              product={item}
             />
           </Grid>
         ))}

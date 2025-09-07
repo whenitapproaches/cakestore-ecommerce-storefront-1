@@ -7,7 +7,7 @@ export const PriceText = styled("div")(({ theme }) => ({
   lineHeight: 1,
   fontWeight: 700,
   marginTop: ".75rem",
-  color: theme.palette.text.main,
+  color: theme.palette.text.primary,
   display: "flex",
   flexDirection: "column",
   ".base-price": {

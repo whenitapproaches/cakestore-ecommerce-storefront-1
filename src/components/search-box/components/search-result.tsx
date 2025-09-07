@@ -46,7 +46,7 @@ export default function SearchResult({ results, search }: Props) {
       <Divider />
       <Link href={`/shop?search=${encodeURIComponent(search || "")}`}>
         <MenuItem sx={{ justifyContent: "center", fontWeight: 600 }}>
-          Xem tất cả "{search}"
+          Xem tất cả &quot;{search}&quot;
         </MenuItem>
       </Link>
     </SearchResultCard>

@@ -4,7 +4,6 @@ import { headers, cookies } from "next/headers"
 import { fetchOrder as fetchOrderApi } from "lib/api"
 import { Box } from "@mui/material"
 import { Container } from "@mui/material"
-import PageWrapper from "pages-sections/vendor-dashboard/page-wrapper"
 import OrderDetailsPageView from "pages-sections/customer-dashboard/orders/page-view/order-details"
 import { t } from "i18next"
 

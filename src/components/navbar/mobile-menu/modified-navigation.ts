@@ -1,7 +1,7 @@
 import navigation from "data/navbarNavigation";
 
 // MODIFY THE NAVIGATION WITH NEW STRUCTURE
-export const updateNavigation = navigation.reduce((prev: any[], curr) => {
+export const updateNavigation = navigation.reduce((prev: any[], curr: any) => {
   const newArr = [...prev];
 
   if (!curr.child) {
