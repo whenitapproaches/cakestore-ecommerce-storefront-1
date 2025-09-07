@@ -4,6 +4,9 @@ import { getContext } from "lib/getStatic"
 import { StoreSettingsSelector } from "graphql/selectors"
 import { HttpStatusCode } from "axios"
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic'
+
 export async function GET(req: NextRequest) {
   try {
     const ctx = getContext()

@@ -10,7 +10,6 @@ import LazyImage from "components/LazyImage"
 import FlexBox from "components/flex-box/flex-box"
 // LOCAL CUSTOM COMPONENTS
 import MobileHeader from "./components/mobile-header"
-import CategoriesMenu from "./components/categories-menu"
 import LoginCartButtons from "./components/login-cart-buttons"
 import DialogDrawer from "./components/dialog-drawer"
 // STYLED COMPONENTS

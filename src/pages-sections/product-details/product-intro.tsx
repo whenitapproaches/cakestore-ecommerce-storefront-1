@@ -23,14 +23,13 @@ import QuantityStepper from "components/QuantityStepper"
 // CUSTOM UTILS LIBRARY FUNCTION
 import { formatCurrency, calculateDiscount } from "lib"
 // CUSTOM DATA MODEL
-import Product from "models/Product.model"
 // TRANSLATION
 import { useTranslation } from "react-i18next"
 // TOAST NOTIFICATION
 import { useToast } from "contexts/ToastContext"
 
 // ================================================================
-type Props = { product: Product }
+type Props = { product: any }
 // ================================================================
 
 export default function ProductIntro({ product }: Props) {

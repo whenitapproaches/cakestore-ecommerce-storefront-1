@@ -6,7 +6,6 @@ import CircularProgress from "@mui/material/CircularProgress"
 // GLOBAL CUSTOM COMPONENT
 import { H6 } from "components/Typography"
 // DUMMY CUSTOM DATA
-import countryList from "data/countryList"
 import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { level1s } from "dvhcvn"

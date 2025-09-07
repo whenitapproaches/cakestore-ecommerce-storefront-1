@@ -16,7 +16,6 @@ import IconButton from "@mui/material/IconButton"
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart"
 import CircularProgress from "@mui/material/CircularProgress"
 import FavoriteButton from "./components/favorite-button"
-import Product from "models/Product.model"
 import { useMemo, useState, useCallback } from "react"
 import useCart from "hooks/useCart"
 import VariantConfigDialog from "../variant-config-dialog"
@@ -60,7 +59,7 @@ const ContentWrapper = styled("div")(({ theme }) => ({
 
 // ===========================================================
 type Props = {
-  product: Product
+  product: any
 }
 // ===========================================================
 

@@ -5,11 +5,10 @@ import { Span } from "components/Typography"
 import FlexBetween from "components/flex-box/flex-between"
 import { ProductCard9 } from "components/product-cards/product-card-9"
 // CUSTOM DATA MODEL
-import Product from "models/Product.model"
 
 // ==========================================================
 type Props = { 
-  products: Product[]
+  products: any[]
   total?: number
   page?: number
   limit?: number
@@ -29,7 +28,7 @@ export default function ProductsListView({
   const to = Math.min(page * limit, total)
   return (
     <div>
-      {products.map((item) => (
+      {products.map((item: any) => (
         <ProductCard9 product={item} key={item.id} />
       ))}
 

@@ -12,7 +12,6 @@ import { formatCurrency } from "lib"
 // STYLED COMPONENTS
 import { PriceText } from "./styles"
 // CUSTOM DATA MODEL
-import Product from "models/Product.model"
 
 import DiscountChip from "../discount-chip"
 // CART CONTAINER
@@ -23,7 +22,7 @@ import VariantConfigDialog from "../variant-config-dialog"
 import axios from "axios"
 
 // ==============================================================
-type Props = { product: Product }
+type Props = { product: any }
 // ==============================================================
 
 export default function ProductCard16({ product }: Props) {

@@ -7,11 +7,10 @@ import { Span } from "components/Typography";
 import { FlexBetween } from "components/flex-box";
 import ProductCard16 from "components/product-cards/product-card-16";
 // CUSTOM DATA MODEL
-import Product from "models/Product.model";
 
 // ========================================================
 type Props = { 
-  products: Product[]
+  products: any[]
   total?: number
   page?: number
   limit?: number
@@ -32,7 +31,7 @@ export default function ProductsGridView({
   return (
     <Fragment>
       <Grid container spacing={8}>
-        {products.map((item: Product) => (
+        {products.map((item: any) => (
           <Grid item lg={4} sm={6} xs={12} key={item.slug}>
             <ProductCard16 product={item} />
           </Grid>

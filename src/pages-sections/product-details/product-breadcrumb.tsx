@@ -2,10 +2,9 @@
 
 import { Breadcrumbs, Typography } from "@mui/material";
 import Link from "next/link";
-import Product from "models/Product.model";
 import { useTranslation } from "react-i18next";
 
-export default function ProductBreadcrumbs({ product }: { product: Product }) {
+export default function ProductBreadcrumbs({ product }: { product: any }) {
   const { t } = useTranslation()
   return (
     <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 2 }}>

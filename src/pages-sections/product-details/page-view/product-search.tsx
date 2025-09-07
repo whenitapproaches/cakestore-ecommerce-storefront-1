@@ -29,7 +29,6 @@ import {
   ProductFilterValues,
   ProductFilters,
 } from "../types"
-import Product from "models/Product.model"
 import { useTranslation } from "react-i18next"
 import { formatCurrency } from "lib"
 import { upperFirst } from "lodash"
@@ -49,7 +48,7 @@ const initialFilters = {
 }
 
 interface ProductSearchPageViewProps {
-  products?: Product[]
+  products?: any[]
   total?: number
   priceFilterSetting?: { key: string; value: string } | null
   initialFilters?: {

@@ -52,15 +52,9 @@ export default async function ProductDetails({ params }: { params: { slug: strin
       notFound();
     }
 
-    // Fetch related data
-    const relatedProducts = await getRelatedProducts();
-    const frequentlyBought = await getFrequentlyBought();
-
     return (
       <ProductDetailsPageView
         product={product}
-        relatedProducts={relatedProducts}
-        frequentlyBought={frequentlyBought}
       />
     );
   } catch (error) {

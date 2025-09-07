@@ -1,8 +1,8 @@
 /* eslint-disable */
 
 import { AllTypesProps, ReturnTypes, Ops } from "./const"
-export const HOST = "http://localhost:3000/shop-api"
 
+export const HOST = process.env.VENDURE_HOST || 'http://localhost:3000/shop-api'
 export const HEADERS = {}
 export const apiSubscription = (options: chainOptions) => (query: string) => {
   try {
@@ -196,7 +196,7 @@ export const Thunder =
         })
       }
       return data
-    }) as Promise<InputType<GraphQLTypes[R], Z, SCLR>>
+    }) as Promise<InputType<GraphQLTypes[R & keyof GraphQLTypes], Z, SCLR>>
 
 export const Chain = (...options: chainOptions) => Thunder(apiFetch(options))
 
@@ -219,13 +219,13 @@ export const SubscriptionThunder =
         operationOptions: ops,
         scalars: graphqlOptions?.scalars,
       })
-    ) as SubscriptionToGraphQL<Z, GraphQLTypes[R], SCLR>
+    ) as SubscriptionToGraphQL<Z, GraphQLTypes[R & keyof GraphQLTypes], SCLR>
     if (returnedFunction?.on && graphqlOptions?.scalars) {
       const wrapped = returnedFunction.on
       returnedFunction.on = (
-        fnToCall: (args: InputType<GraphQLTypes[R], Z, SCLR>) => void
+        fnToCall: (args: InputType<GraphQLTypes[R & keyof GraphQLTypes], Z, SCLR>) => void
       ) =>
-        wrapped((data: InputType<GraphQLTypes[R], Z, SCLR>) => {
+        wrapped((data: InputType<GraphQLTypes[R & keyof GraphQLTypes], Z, SCLR>) => {
           if (graphqlOptions?.scalars) {
             return fnToCall(
               decodeScalarsInResponse({
@@ -758,8 +758,8 @@ export const resolverFor = <
       ? Input
       : any,
     source: any
-  ) => Z extends keyof ModelTypes[T]
-    ? ModelTypes[T][Z] | Promise<ModelTypes[T][Z]> | X
+  ) => Z extends keyof ModelTypes[T & keyof ModelTypes]
+    ? ModelTypes[T & keyof ModelTypes][Z] | Promise<ModelTypes[T & keyof ModelTypes][Z]> | X
     : never
 ) => fn as (args?: any, source?: any) => ReturnType<typeof fn>
 
@@ -4104,7 +4104,7 @@ query will once again return `null`. */
     __typename?: boolean | `@${string}`
     storeSettings?: [
       { input?: ResolverInputTypes["StoreSettingsListInput"] | undefined | null },
-      ResolverInputTypes["StoreSettingsList"],
+      any,
     ]
   }>
   ["Mutation"]: AliasType<{
@@ -7754,7 +7754,7 @@ and refund calculations. */
     collections: Array<ModelTypes["CollectionResult"]>
   }
   ["StoreSettingsList"]: {
-    items: Array<ModelTypes["StoreSettings"]>
+    items: Array<any>
     totalItems: number
   }
   /** Which FacetValues are present in the products returned
@@ -9973,7 +9973,7 @@ and refund calculations. */
     collections: Array<GraphQLTypes["CollectionResult"]>
   }
   ["StoreSettingsList"]: {
-    items: Array<GraphQLTypes["StoreSettings"]>
+    items: Array<any>
     totalItems: number
   }
   /** Which FacetValues are present in the products returned

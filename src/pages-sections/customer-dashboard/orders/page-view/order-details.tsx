@@ -6,15 +6,13 @@ import ShoppingBag from "@mui/icons-material/ShoppingBag"
 import OrderSummery from "../order-summery"
 import OrderProgress from "../order-progress"
 import OrderedProducts from "../ordered-products"
-import DashboardHeader from "../../dashboard-header"
 import OrderNotes from "../order-notes"
 import OrderPayment from "../order-payment"
-import Order from "models/Order.model"
 import { Grid } from "@mui/material"
 
 // =============================================================
 type Props = {
-  order: Order
+  order: any
   qrImageUrl?: string | null
   qrImageUrl2?: string | null
 }

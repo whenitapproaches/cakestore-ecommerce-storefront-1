@@ -1,5 +1,3 @@
-// LOCAL CUSTOM COMPONENTS
-import Categories from "./categories"
 import NavigationList from "./nav-list"
 // STYLED COMPONENTS
 import { NavBarWrapper, InnerContainer } from "./styles"

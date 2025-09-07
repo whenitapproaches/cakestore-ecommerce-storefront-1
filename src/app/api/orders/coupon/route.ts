@@ -5,6 +5,9 @@ import { storefrontApiMutation, latestVendureAuthToken } from "graphql/client"
 import { getContext } from "lib/getStatic"
 import { ActiveOrderSelector } from "graphql/selectors"
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic'
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
