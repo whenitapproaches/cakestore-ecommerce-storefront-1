@@ -7,6 +7,7 @@ const nextConfig = {
       { protocol: "https", hostname: "ui-lib.com" },
       { hostname: "localhost", port: "3000" },
       { hostname: "img.vietqr.io" },
+      { hostname: "cakestore-server.apigsm.shop" },
     ],
   },
 }
