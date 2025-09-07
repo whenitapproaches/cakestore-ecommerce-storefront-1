@@ -1,7 +1,7 @@
 "use client";
 
 import Grid from "@mui/material/Grid";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "contexts/ToastContext";
 import { cartApi } from "lib";
@@ -9,11 +9,19 @@ import { useTranslation } from "react-i18next";
 // LOCAL CUSTOM COMPONENTS
 import { CheckoutForm } from "../checkout-form";
 import { CheckoutSummary } from "../checkout-summery";
+import { PaymentMethodsSelection } from "../payment-methods-selection";
 
 export default function CheckoutPageView() {
   const router = useRouter();
   const { showToast } = useToast();
   const { t } = useTranslation();
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<{
+    id: string
+    name: string
+    code: string
+    description?: string | null
+    isEligible: boolean
+  } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -46,11 +54,14 @@ export default function CheckoutPageView() {
   return (
     <Grid container flexWrap="wrap-reverse" spacing={3}>
       <Grid item lg={8} md={8} xs={12}>
-        <CheckoutForm />
+        <CheckoutForm selectedPaymentMethod={selectedPaymentMethod} />
       </Grid>
 
       <Grid item lg={4} md={4} xs={12}>
         <CheckoutSummary />
+        <PaymentMethodsSelection 
+          onPaymentMethodChange={(method) => setSelectedPaymentMethod(method)}
+        />
       </Grid>
     </Grid>
   );

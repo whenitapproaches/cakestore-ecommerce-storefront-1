@@ -47,6 +47,14 @@ class ApiClient {
     // Add request interceptor
     this.axiosInstance.interceptors.request.use(
       (config) => {
+        // Add shop API token on server-side only
+        if (typeof window === 'undefined') {
+          const shopApiToken = process.env.SHOP_API_TOKEN || ''
+          if (shopApiToken) {
+            config.headers['x-shop-api-token'] = shopApiToken
+          }
+        }
+        
         // Remove Content-Type header for GET requests or when body is FormData
         if (config.method === 'get' || config.data instanceof FormData) {
           delete config.headers['Content-Type']
@@ -294,6 +302,17 @@ export const couponApi = {
   remove: (code: string) => api.delete<{ success: boolean; order: any }>(
     `/api/orders/coupon?code=${encodeURIComponent(code)}`
   ),
+}
+
+export const paymentMethodsApi = {
+  // Get eligible payment methods
+  getEligibleMethods: () => api.get<{ methods: Array<{
+    id: string
+    name: string
+    code: string
+    description?: string | null
+    isEligible: boolean
+  }> }>('/api/orders/payment-methods'),
 }
 
 export const storeSettingsApi = {

@@ -147,6 +147,7 @@ export default function VariantConfigDialog({
         <Button
           onClick={() => currentVariant && onConfirm(currentVariant.id)}
           disabled={!canConfirm}
+          color="primary"
           variant="contained"
         >
           {t("OK")}

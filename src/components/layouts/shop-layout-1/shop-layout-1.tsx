@@ -23,7 +23,7 @@ export default function ShopLayout1({ children }: PropsWithChildren) {
 
   return (
     <Fragment>
-      <Topbar />
+      <Topbar bgColor="#102542" />
 
       {/* HEADER */}
       <Sticky fixedOn={0} onSticky={toggleIsFixed} scrollDistance={300}>

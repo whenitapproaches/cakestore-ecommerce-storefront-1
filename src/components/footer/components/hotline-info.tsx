@@ -5,7 +5,7 @@ import Box from "@mui/material/Box";
 import styled from "@mui/material/styles/styled";
 import PhoneIcon from "@mui/icons-material/Phone";
 // GLOBAL CUSTOM COMPONENT
-import { Paragraph } from "components/Typography";
+import { H4, Paragraph } from "components/Typography";
 import { FlexBox } from "components/flex-box";
 // API
 import { storeSettingsApi } from "lib/api";
@@ -27,7 +27,7 @@ const PhoneIconWrapper = styled(Box)(({ theme }) => ({
   width: "40px",
   height: "40px",
   borderRadius: "50%",
-  backgroundColor: theme.palette.primary.main,
+  backgroundColor: theme.palette.primary[600],
   color: "white",
 }));
 
@@ -38,7 +38,7 @@ const HotlineContent = styled(Box)(() => ({
 }));
 
 const HotlineTitle = styled(Paragraph)(({ theme }) => ({
-  color: "white",
+  color: "grey.900",
   fontSize: "14px",
   fontWeight: 600,
   margin: 0,
@@ -95,9 +95,9 @@ export default function HotlineInfo() {
         <PhoneIcon fontSize="small" />
       </PhoneIconWrapper>
       <HotlineContent>
-        <HotlineTitle>Hotline chăm sóc khách hàng</HotlineTitle>
+        <H4 color="grey.900" mb={2}>Hotline chăm sóc khách hàng</H4>
         <HotlineNumber>{hotlineNumber}</HotlineNumber>
-        <HotlineSubtitle>{hotlineDescription || "Thứ Hai – Thứ Sáu (8h-18h)"}</HotlineSubtitle>
+        <Paragraph color="grey.500">{hotlineDescription || ""}</Paragraph>
       </HotlineContent>
     </HotlineContainer>
   );

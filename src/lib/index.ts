@@ -74,6 +74,7 @@ export {
   shippingApi,
   couponApi,
   cartApi,
+  paymentMethodsApi,
   type ApiResponse,
   type ApiError,
   type HttpMethod,

@@ -519,7 +519,8 @@ export const OrderMaskedSelector = Selector("Order")({
       type: true,
       data: true,
     }
-  }
+  },
+  payments: paymentSelector,
 })
 
 export type OrderMaskedType = FromSelector<

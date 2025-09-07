@@ -68,7 +68,7 @@ export async function GET(
             {
               options: {
                 filter: {
-                  type: { in: ["ORDER_STATE_TRANSITION", "ORDER_NOTE"] },
+                  type: { in: ["ORDER_STATE_TRANSITION", "ORDER_NOTE", "ORDER_FULFILLMENT", "ORDER_FULFILLMENT_TRANSITION"] },
                 },
               },
             },

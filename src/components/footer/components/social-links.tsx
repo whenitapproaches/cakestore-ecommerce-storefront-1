@@ -53,8 +53,6 @@ export default function SocialLinks({ variant = "light" }: Props) {
           settings[item.key] = item.value;
         });
 
-        console.log(settings)
-        
         setSocialLinks({
           facebook: settings["social-facebook"] || "",
           youtube: settings["social-youtube"] || "",

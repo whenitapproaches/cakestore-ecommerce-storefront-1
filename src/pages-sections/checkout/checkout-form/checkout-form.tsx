@@ -10,14 +10,24 @@ import * as yup from "yup"
 import { Formik } from "formik"
 // LOCAL CUSTOM COMPONENTS
 import ShippingForm from "./shipping-form"
-import { ordersApi, shippingApi } from "lib"
+import { ordersApi, shippingApi, paymentMethodsApi } from "lib"
 import { useToast } from "contexts/ToastContext"
 import { useTranslation } from "react-i18next"
 import { useChannels } from "channels"
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ""
 
-export default function CheckoutForm() {
+interface Props {
+  selectedPaymentMethod?: {
+    id: string
+    name: string
+    code: string
+    description?: string | null
+    isEligible: boolean
+  } | null
+}
+
+export default function CheckoutForm({ selectedPaymentMethod }: Props) {
   const router = useRouter()
   const { showToast } = useToast()
   const { t } = useTranslation()
@@ -62,6 +72,12 @@ export default function CheckoutForm() {
         return
       }
 
+      // Check if payment method is selected
+      if (!selectedPaymentMethod) {
+        showToast(t("Please select a payment method"), 3000, "error")
+        return
+      }
+
       setIsPlacingOrder(true)
 
       const payload = {
@@ -75,6 +91,7 @@ export default function CheckoutForm() {
           district: values.shipping_district,
           ward: values.shipping_ward,
         },
+        paymentMethodCode: selectedPaymentMethod.code,
         turnstileToken: token,
       }
       const res = await ordersApi.place(payload)

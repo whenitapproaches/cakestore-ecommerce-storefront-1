@@ -22,7 +22,8 @@ export default function SearchInput() {
       height: 44,
       paddingRight: 0,
       overflow: "hidden",
-      backgroundColor: "grey.200",
+      backgroundColor: "grey.100",
+      color: "grey.700",
       "& .MuiOutlinedInput-notchedOutline": { border: 0 },
     },
     endAdornment: (

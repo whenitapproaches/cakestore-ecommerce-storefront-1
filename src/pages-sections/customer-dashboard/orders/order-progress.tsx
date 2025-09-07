@@ -13,12 +13,15 @@ import TimelineConnector from "@mui/lab/TimelineConnector"
 import TimelineContent from "@mui/lab/TimelineContent"
 import TimelineDot from "@mui/lab/TimelineDot"
 import TimelineOppositeContent from "@mui/lab/TimelineOppositeContent"
+import PaymentIcon from "@mui/icons-material/Payment"
+import LocalShippingIcon from "@mui/icons-material/LocalShipping"
+import CheckCircleIcon from "@mui/icons-material/CheckCircle"
 // CUSTOM ICON COMPONENTS
 import Delivery from "icons/Delivery"
 import PackageBox from "icons/PackageBox"
 import TruckFilled from "icons/TruckFilled"
 // GLOBAL CUSTOM COMPONENTS
-import { H5, Paragraph, Small } from "components/Typography"
+import { H5, H6, Paragraph, Small } from "components/Typography"
 import { FlexBetween, FlexBox } from "components/flex-box"
 // UTILS
 import { formatDatetime } from "utils/helpers"
@@ -53,106 +56,198 @@ const StyledAvatar = styled(Avatar)(({ theme }) => ({
 
 export default function OrderProgress({ order }: { order: any }) {
   const { t } = useTranslation()
-  const ORDER_STATUS = "Shipping"
-  const STEP_ICONS = [PackageBox, TruckFilled, Delivery]
-  const ORDER_STATUS_LIST = ["Packaging", "Shipping", "Delivering", "Complete"]
 
-  const statusIndex = ORDER_STATUS_LIST.indexOf(ORDER_STATUS)
-
-  // Filter history entries for ORDER_STATE_TRANSITION only and specific states
-  const allowedStates = [
-    "ArrangingPayment",
-    "PaymentSettled",
-    "Fulfilled",
-    "Shipped",
-    "Delivered",
-    "Cancelled",
-  ]
+  // Filter and process history entries
   const historyEntries = Array.isArray(order?.history?.items)
-    ? order.history.items.filter(
-        (entry: any) =>
-          entry.type === "ORDER_STATE_TRANSITION" &&
-          allowedStates.includes(entry.data?.to)
-      )
+    ? order.history.items
     : []
 
-  // Sort by createdAt descending (newest first)
-  const sortedHistory = [...historyEntries].sort(
+  // Payment timeline - ORDER_STATE_TRANSITION with payment-related states
+  const paymentStates = ["ArrangingPayment", "PaymentSettled"]
+  const paymentHistory = historyEntries
+    .filter(
+      (entry: any) =>
+        entry.type === "ORDER_STATE_TRANSITION" &&
+        paymentStates.includes(entry.data?.to)
+    )
+    .map((entry: any) => ({ ...entry, category: "payment" }))
+
+  // Fulfillment timeline - ORDER_FULFILLMENT for recognition and ORDER_FULFILLMENT_TRANSITION for status changes
+  const fulfillmentHistory = historyEntries
+    .filter((entry: any) => {
+      if (entry.type === "ORDER_FULFILLMENT") {
+        return true // Order is recognized for fulfillment
+      }
+      if (entry.type === "ORDER_FULFILLMENT_TRANSITION") {
+        const toState = entry.data?.to
+        return toState === "Shipped" || toState === "Delivered"
+      }
+      return false
+    })
+    .map((entry: any) => ({ ...entry, category: "fulfillment" }))
+
+  // Combine and sort all timeline entries chronologically
+  const combinedHistory = [...paymentHistory, ...fulfillmentHistory].sort(
     (a: any, b: any) =>
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
   )
 
   const getStateDisplayName = (state: string) => {
-    // Map internal states to user-friendly names
     const stateMap: { [key: string]: string } = {
-      Created: t("Order Created"),
-      AddingItems: t("Adding Items"),
       ArrangingPayment: t("Arranging Payment"),
-      PaymentAuthorized: t("Payment Authorized"),
       PaymentSettled: t("Payment Settled"),
-      PartiallyFulfilled: t("Partially Fulfilled"),
-      Fulfilled: t("Fulfilled"),
-      PartiallyShipped: t("Partially Shipped"),
       Shipped: t("Shipped"),
-      PartiallyDelivered: t("Partially Delivered"),
       Delivered: t("Delivered"),
-      Cancelled: t("Cancelled"),
     }
     return stateMap[state] || state
   }
 
+  const getPaymentIcon = (state: string) => {
+    switch (state) {
+      case "ArrangingPayment":
+        return <PaymentIcon />
+      case "PaymentSettled":
+        return <CheckCircleIcon />
+      default:
+        return <PaymentIcon />
+    }
+  }
+
+  const getFulfillmentIcon = (entry: any) => {
+    if (entry.type === "ORDER_FULFILLMENT") {
+      return <PackageBox />
+    }
+    if (entry.type === "ORDER_FULFILLMENT_TRANSITION") {
+      const toState = entry.data?.to
+      switch (toState) {
+        case "Shipped":
+          return <LocalShippingIcon />
+        case "Delivered":
+          return <Delivery />
+        default:
+          return <TruckFilled />
+      }
+    }
+    return <PackageBox />
+  }
+
+  const getFulfillmentLabel = (entry: any) => {
+    if (entry.type === "ORDER_FULFILLMENT") {
+      return t("Order Fulfillment Started")
+    }
+    if (entry.type === "ORDER_FULFILLMENT_TRANSITION") {
+      return getStateDisplayName(entry.data?.to)
+    }
+    return t("Fulfillment Update")
+  }
+
+  const renderTimelineItem = (
+    entry: any,
+    index: number,
+    totalItems: number,
+    isCurrentState: boolean = false
+  ) => {
+    const relativeTime = formatDistanceToNow(new Date(entry.createdAt), {
+      addSuffix: true,
+      locale: vi,
+    })
+
+    // Determine color based on entry category
+    const getTimelineColor = () => {
+      return entry.category === "payment" ? "primary" : "secondary"
+    }
+
+    return (
+      <TimelineItem key={`${entry.type}-${entry.createdAt}-${index}`}>
+        <TimelineOppositeContent
+          sx={{ m: "auto 0", flex: 0.3 }}
+          align="right"
+          variant="body2"
+          color="text.secondary"
+        >
+          <Small
+            fontWeight="500"
+            color={isCurrentState ? "text.primary" : "text.disabled"}
+          >
+            {relativeTime}
+          </Small>
+          <br />
+          <Small color={isCurrentState ? "text.secondary" : "text.disabled"}>
+            {formatDatetime(entry.createdAt)}
+          </Small>
+        </TimelineOppositeContent>
+        <TimelineSeparator>
+          <TimelineDot
+            color={getTimelineColor()}
+            sx={{
+              p: 1,
+              opacity: isCurrentState ? 1 : 0.5,
+              "& .MuiSvgIcon-root": {
+                opacity: isCurrentState ? 1 : 0.6,
+              },
+            }}
+          >
+            {entry.category === "payment"
+              ? getPaymentIcon(entry.data?.to)
+              : getFulfillmentIcon(entry)}
+          </TimelineDot>
+          {index < totalItems - 1 && (
+            <TimelineConnector
+              sx={{
+                opacity: isCurrentState || index === totalItems - 2 ? 1 : 0.3,
+              }}
+            />
+          )}
+        </TimelineSeparator>
+        <TimelineContent sx={{ py: "12px", px: 2 }}>
+          <Paragraph
+            fontWeight={isCurrentState ? "600" : "400"}
+            color={isCurrentState ? "text.primary" : "text.disabled"}
+          >
+            {entry.category === "payment"
+              ? getStateDisplayName(entry.data?.to)
+              : getFulfillmentLabel(entry)}
+          </Paragraph>
+        </TimelineContent>
+      </TimelineItem>
+    )
+  }
+
   return (
     <Card sx={{ p: 3, mb: 4 }}>
-      {/* Order History Timeline */}
-      {sortedHistory.length > 0 && (
-        <>
-          <Box>
-            <H5 mt={0} mb={2}>{t("Order History")}</H5>
-            <Timeline position="right">
-              {sortedHistory.map((entry: any, index: number) => {
-                const toState = entry.data?.to
-                const isCurrentState = index === 0 // First item is the most recent (current) state
-                const relativeTime = formatDistanceToNow(
-                  new Date(entry.createdAt),
-                  {
-                    addSuffix: true,
-                    locale: vi,
-                  }
-                )
+      {/* Unified Order Progress Timeline */}
+      {combinedHistory.length > 0 && (
+        <Box>
+          <H6 mt={0} mb={2} color="text.primary">
+            {t("Order Progress")}
+          </H6>
+          <Timeline position="right">
+            {combinedHistory.map((entry: any, index: number) => {
+              // Determine if this is the most recent entry of its category
+              const categoryEntries = combinedHistory.filter(
+                (e) => e.category === entry.category
+              )
+              const isCurrentStateInCategory =
+                categoryEntries.indexOf(entry) === categoryEntries.length - 1
 
-                return (
-                  <TimelineItem key={index}>
-                    <TimelineOppositeContent
-                      sx={{ m: "auto 0", flex: 0.3 }}
-                      align="right"
-                      variant="body2"
-                      color="text.secondary"
-                    >
-                      <Small fontWeight="500" color="text.primary">
-                        {relativeTime}
-                      </Small>
-                      <br />
-                      <Small>{formatDatetime(entry.createdAt)}</Small>
-                    </TimelineOppositeContent>
-                    <TimelineSeparator>
-                      <TimelineDot
-                        color={isCurrentState ? "primary" : "grey"}
-                      />
-                      {index < sortedHistory.length - 1 && (
-                        <TimelineConnector />
-                      )}
-                    </TimelineSeparator>
-                    <TimelineContent sx={{ py: "12px", px: 2 }}>
-                      <Paragraph fontWeight="600">
-                        {getStateDisplayName(toState)}
-                      </Paragraph>
-                    </TimelineContent>
-                  </TimelineItem>
-                )
-              })}
-            </Timeline>
-          </Box>
-        </>
+              return renderTimelineItem(
+                entry,
+                index,
+                combinedHistory.length,
+                isCurrentStateInCategory
+              )
+            })}
+          </Timeline>
+        </Box>
+      )}
+
+      {/* No Progress Message */}
+      {combinedHistory.length === 0 && (
+        <Box textAlign="center" py={4}>
+          <Paragraph color="text.secondary">
+            {t("No progress information available")}
+          </Paragraph>
+        </Box>
       )}
     </Card>
   )

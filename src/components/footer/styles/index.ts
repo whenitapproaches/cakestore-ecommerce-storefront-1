@@ -27,7 +27,7 @@ export const StyledFooter = styled("footer")(({ theme }) => ({
 
 export const StyledRoot = styled("footer")(({ theme }) => ({
   padding: 40,
-  color: "white",
+  color: "grey.900",
   borderRadius: 8,
   background: theme.palette.primary[600],
   [theme.breakpoints.down("md")]: { marginBottom: "6rem !important" }

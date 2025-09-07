@@ -43,6 +43,11 @@ export default function OrderSummery({ order }: Props) {
   )
   const total = Number(order?.totalWithTax || order?.total || 0)
   const customer = order?.customer || {}
+  
+  // Example: Access payment method code from order custom fields
+  // const paymentMethodCode = order?.customFields?.paymentMethodCode || null
+  // console.log('Payment method used:', paymentMethodCode)
+  
   return (
     <Grid container spacing={3}>
       {/* CUSTOMER & SHIPPING INFO */}

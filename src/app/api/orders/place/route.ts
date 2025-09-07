@@ -21,10 +21,24 @@ export async function POST(req: NextRequest) {
   try {
     const ctx = getContext()
     const body = await req.json()
-    const { emailAddress, firstName, lastName, phoneNumber, shipping, turnstileToken } =
-      body || {}
+    const {
+      emailAddress,
+      firstName,
+      lastName,
+      phoneNumber,
+      shipping,
+      paymentMethodCode,
+      turnstileToken,
+    } = body || {}
 
-    if (!emailAddress || !firstName || !lastName || !phoneNumber || !shipping) {
+    if (
+      !emailAddress ||
+      !firstName ||
+      !lastName ||
+      !phoneNumber ||
+      !shipping ||
+      !paymentMethodCode
+    ) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: HttpStatusCode.BadRequest }
@@ -53,18 +67,24 @@ export async function POST(req: NextRequest) {
     verifyForm.append("response", turnstileToken)
     verifyForm.append("remoteip", req.ip || "")
 
-    const turnstileResponse = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: verifyForm.toString(),
-    })
+    const turnstileResponse = await fetch(
+      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: verifyForm.toString(),
+      }
+    )
 
     const turnstileData = await turnstileResponse.json()
     if (!turnstileData.success) {
       return NextResponse.json(
-        { error: "CAPTCHA_FAILED", details: turnstileData["error-codes"] || [] },
+        {
+          error: "CAPTCHA_FAILED",
+          details: turnstileData["error-codes"] || [],
+        },
         { status: HttpStatusCode.BadRequest }
       )
     }
@@ -74,8 +94,6 @@ export async function POST(req: NextRequest) {
 
     // Ensure we are allowed to proceed to arranging payment
     const { nextOrderStates } = await q({ nextOrderStates: true })
-
-    console.log(nextOrderStates)
 
     if (
       !Array.isArray(nextOrderStates) ||
@@ -101,8 +119,6 @@ export async function POST(req: NextRequest) {
         },
       ],
     })
-
-    console.log(setCustomerForOrder)
 
     if (setCustomerForOrder.__typename !== "Order") {
       return NextResponse.json(
@@ -146,7 +162,6 @@ export async function POST(req: NextRequest) {
         ],
       }),
     ])
-    console.log(sa, ba)
     if (sa.setOrderShippingAddress.__typename !== "Order") {
       return NextResponse.json(
         { error: `${sa.setOrderShippingAddress.__typename?.toUpperCase()}` },
@@ -183,16 +198,19 @@ export async function POST(req: NextRequest) {
           "...on Order": ActiveOrderSelector,
           "...on OrderModificationError": { errorCode: true, message: true },
           "...on NoActiveOrderError": { errorCode: true, message: true },
-          "...on IneligibleShippingMethodError": { errorCode: true, message: true },
+          "...on IneligibleShippingMethodError": {
+            errorCode: true,
+            message: true,
+          },
         },
       ],
     })
 
-    console.log(setOrderShippingMethod)
-
     if (setOrderShippingMethod.__typename !== "Order") {
       return NextResponse.json(
-        { error: `SHIPPING_METHOD_ERROR_${setOrderShippingMethod.__typename?.toUpperCase()}` },
+        {
+          error: `SHIPPING_METHOD_ERROR_${setOrderShippingMethod.__typename?.toUpperCase()}`,
+        },
         { status: HttpStatusCode.BadRequest }
       )
     }
@@ -221,8 +239,6 @@ export async function POST(req: NextRequest) {
       ],
     })
 
-    console.log(transitionOrderToState)
-
     if (transitionOrderToState.__typename !== "Order") {
       return NextResponse.json(
         { error: "ORDER_STATE_TRANSITION_ERROR" },
@@ -230,9 +246,74 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Save payment method code in order custom fields
+    const { setOrderCustomFields } = await m({
+      setOrderCustomFields: [
+        { 
+          input: { 
+            customFields: {
+              paymentMethodCode: paymentMethodCode
+            }
+          }
+        },
+        {
+          __typename: true,
+          "...on Order": ActiveOrderSelector,
+          "...on NoActiveOrderError": { errorCode: true, message: true },
+        },
+      ],
+    })
+
+    if (setOrderCustomFields.__typename !== "Order") {
+      return NextResponse.json(
+        { error: `CUSTOM_FIELDS_ERROR_${setOrderCustomFields.__typename?.toUpperCase()}` },
+        { status: HttpStatusCode.BadRequest }
+      )
+    }
+
+    let paymentResult = null
+    const { addPaymentToOrder } = await m({
+      addPaymentToOrder: [
+        {
+          input: {
+            method: paymentMethodCode,
+            metadata: {
+              method: paymentMethodCode,
+              orderCode: transitionOrderToState.code,
+            },
+          },
+        },
+        {
+          __typename: true,
+          "...on Order": ActiveOrderSelector,
+          "...on OrderPaymentStateError": { errorCode: true, message: true },
+          "...on IneligiblePaymentMethodError": {
+            errorCode: true,
+            message: true,
+          },
+          "...on PaymentFailedError": { errorCode: true, message: true },
+          "...on PaymentDeclinedError": { errorCode: true, message: true },
+          "...on OrderStateTransitionError": { errorCode: true, message: true },
+          "...on NoActiveOrderError": { errorCode: true, message: true },
+        },
+      ],
+    })
+
+    if (addPaymentToOrder.__typename !== "Order") {
+      return NextResponse.json(
+        {
+          error: `PAYMENT_ERROR_${addPaymentToOrder.__typename?.toUpperCase()}`,
+        },
+        { status: HttpStatusCode.BadRequest }
+      )
+    }
+
+    paymentResult = addPaymentToOrder
+
     // Generate JWT token and redirect URL similar to tracking route
-    const origin = req.headers.get("x-url-origin") || req.headers.get("origin") || ""
-    
+    const origin =
+      req.headers.get("x-url-origin") || req.headers.get("origin") || ""
+
     const jwtSecret = process.env.ORDER_REDIRECT_SECRET
     if (!jwtSecret) {
       return NextResponse.json(
@@ -241,8 +322,11 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Get the final order object (use COD payment result if available)
+    const finalOrder = paymentResult
+
     // Create JWT payload with order code
-    const orderCode = transitionOrderToState.code
+    const orderCode = finalOrder.code
     const jwtPayload: OrderTokenPayload = {
       orderCode,
       iat: Math.floor(Date.now() / 1000),
@@ -251,14 +335,16 @@ export async function POST(req: NextRequest) {
 
     const jwtToken = jwt.sign(jwtPayload, jwtSecret, { algorithm: "HS256" })
 
-    const url = new URL(`${origin}/orders/code/${encodeURIComponent(orderCode)}`)
+    const url = new URL(
+      `${origin}/orders/code/${encodeURIComponent(orderCode)}`
+    )
     url.searchParams.set("token", jwtToken)
 
     return NextResponse.json(
-      { 
-        success: true, 
-        order: transitionOrderToState,
-        redirectUrl: url.toString()
+      {
+        success: true,
+        order: finalOrder,
+        redirectUrl: url.toString(),
       },
       { status: HttpStatusCode.Ok }
     )

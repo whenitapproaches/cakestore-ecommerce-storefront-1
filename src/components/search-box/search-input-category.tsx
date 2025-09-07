@@ -20,7 +20,9 @@ export default function SearchInputWithCategory() {
       height: 44,
       padding: 0,
       overflow: "hidden",
-      backgroundColor: "grey.200",
+      backgroundColor: "grey.100",
+      borderRadius: "100px",
+      color: "grey.700",
       "& .MuiOutlinedInput-notchedOutline": { border: 0 }
     },
     startAdornment: (

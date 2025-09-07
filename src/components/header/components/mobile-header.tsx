@@ -37,7 +37,7 @@ export default function MobileHeader() {
 
         {/* MIDDLE CONTENT - LOGO */}
         <Link href="/">
-          <Image height={44} src="/assets/images/bazaar-black-sm.svg" alt="logo" />
+          <Image height={44} src="/assets/images/logos/logo.jpg" alt="logo" />
         </Link>
 
         {/* RIGHT CONTENT - CART, SEARCH BUTTON */}

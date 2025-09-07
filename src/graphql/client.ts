@@ -111,9 +111,13 @@ const apiFetchVendure =
         return baseHeadersInit as Record<string, string>
       })()
 
+      // Get shop API token from server-side environment only
+      const shopApiToken = typeof window === 'undefined' ? (process.env.SHOP_API_TOKEN || '') : ''
+      
       const mergedHeaders: Record<string, string> = {
         ...baseHeaders,
         "Content-Type": "application/json",
+        ...(shopApiToken && { "x-shop-api-token": shopApiToken }),
         ...authHeaders,
       }
 
@@ -156,11 +160,13 @@ export const storefrontApiQuery = (ctx: {
   channel: string
 }) => {
   const HOST = `${VENDURE_HOST}?languageCode=${ctx.locale}`
+  const shopApiToken = process.env.SHOP_API_TOKEN || ''
 
   return VendureChain(HOST, {
     headers: {
       "Content-Type": "application/json",
       "vendure-token": ctx.channel,
+      ...(shopApiToken && { "x-shop-api-token": shopApiToken }),
       // ensure Authorization attached on server too (cookies() already handled in apiFetchVendure)
     },
   })("query", { scalars })
@@ -171,11 +177,13 @@ export const storefrontApiMutation = (ctx: {
   channel: string
 }) => {
   const HOST = `${VENDURE_HOST}?languageCode=${ctx.locale}`
+  const shopApiToken = process.env.SHOP_API_TOKEN || ''
 
   return VendureChain(HOST, {
     headers: {
       "Content-Type": "application/json",
       "vendure-token": ctx.channel,
+      ...(shopApiToken && { "x-shop-api-token": shopApiToken }),
       // ensure Authorization attached on server too (cookies() already handled in apiFetchVendure)
     },
   })("mutation", { scalars })
@@ -188,10 +196,13 @@ export const SSGQuery = (params: { locale: string; channel: string }) => {
   }
 
   const HOST = `${VENDURE_HOST}?languageCode=${reqParams.locale}`
+  const shopApiToken = process.env.SHOP_API_TOKEN || ''
+  
   return VendureChain(HOST, {
     headers: {
       "Content-Type": "application/json",
       "vendure-token": reqParams.channel,
+      ...(shopApiToken && { "x-shop-api-token": shopApiToken }),
     },
   })("query", { scalars })
 }
@@ -207,11 +218,14 @@ export const SSRQuery = (context: GetServerSidePropsContext) => {
   const locale = ctx?.params?.locale as string
 
   const HOST = `${VENDURE_HOST}?languageCode=${locale}`
+  const shopApiToken = process.env.SHOP_API_TOKEN || ''
+  
   return VendureChain(HOST, {
     headers: {
       Cookie: `session=${authCookies["session"]}; session.sig=${authCookies["session.sig"]}`,
       "Content-Type": "application/json",
       "vendure-token": properChannel,
+      ...(shopApiToken && { "x-shop-api-token": shopApiToken }),
       ...(context.req.cookies["vendure-auth-token"]
         ? { Authorization: `Bearer ${context.req.cookies["vendure-auth-token"]}` }
         : {}),
@@ -230,11 +244,14 @@ export const SSRMutation = (context: GetServerSidePropsContext) => {
   const locale = ctx?.params?.locale as string
 
   const HOST = `${VENDURE_HOST}?languageCode=${locale}`
+  const shopApiToken = process.env.SHOP_API_TOKEN || ''
+  
   return VendureChain(HOST, {
     headers: {
       Cookie: `session=${authCookies["session"]}; session.sig=${authCookies["session.sig"]}`,
       "Content-Type": "application/json",
       "vendure-token": properChannel,
+      ...(shopApiToken && { "x-shop-api-token": shopApiToken }),
       ...(context.req.cookies["vendure-auth-token"]
         ? { Authorization: `Bearer ${context.req.cookies["vendure-auth-token"]}` }
         : {}),

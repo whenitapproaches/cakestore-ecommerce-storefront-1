@@ -34,41 +34,41 @@ declare module "@mui/material/styles" {
 // =================================================================
 
 export const grey = {
-  900: "#2B3445", // Main Text
-  800: "#373F50", // Paragraph
-  700: "#4B566B",
-  600: "#7D879C", // Low Priority form Title/Text
-  500: "#AEB4BE",
-  400: "#DAE1E7", // Border
-  300: "#E3E9EF",
-  200: "#F3F5F9", // Line Stroke
-  100: "#F6F9FC"
+  900: "#1A242E", // Main Text
+  800: "#2D3842", // Paragraph
+  700: "#404C57",
+  600: "#53606C", // Low Priority form Title/Text
+  500: "#87919E",
+  400: "#9BA5B2", // Border
+  300: "#AFB9C6",
+  200: "#C3CDDA", // Line Stroke
+  100: "#D7E1EE"
 };
 
 export const primary = {
-  100: "#FCE9EC",
-  200: "#F8C7CF",
-  300: "#F07D90",
-  400: "#EC6178",
-  500: "#D23F57",
-  600: "#E63E58",
-  700: "#2374AB",
-  800: "#DF2E44",
-  900: "#D91F33"
+  100: "#FDF0F7",
+  200: "#F9D5E8",
+  300: "#F4A6D0",
+  400: "#EC66A3",
+  500: "#E40066",
+  600: "#CC0059",
+  700: "#A6004A",
+  800: "#80003B",
+  900: "#5A002C"
 };
 
 export const secondary = {
-  100: "#e8e8ee",
-  200: "#b9bacb",
-  300: "#8a8ca8",
-  400: "#5b5d85",
-  500: "#141850",
+  100: "#E8F1FF",
+  200: "#C5DDFF",
+  300: "#9BC4FF",
+  400: "#6BA5FF",
+  500: "#3E7FE8",
   600: "#0F3460",
-  700: "#101340",
-  800: "#0e1138",
-  900: "#0c0e30",
+  700: "#0C2A4F",
+  800: "#08203F",
+  900: "#05162F",
   main: "#0F3460",
-  dark: "#0c0e30"
+  dark: "#05162F"
 };
 
 export const error = {
@@ -198,6 +198,6 @@ export const themeColors = {
   secondary,
   info: blue,
   divider: grey[200],
-  background: { default: grey[100] },
-  text: { primary: grey[900], secondary: grey[800], disabled: grey[400] }
+  background: { default: white.main },
+  text: { primary: '#2A3440', secondary: grey[800], disabled: grey[400] }
 };
