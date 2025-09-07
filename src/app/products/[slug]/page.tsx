@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import { ProductDetailsPageView } from "pages-sections/product-details/page-view";
 // API FUNCTIONS
 import { productsApi, handleApiError } from "lib/api";
-import { getFrequentlyBought, getRelatedProducts } from "utils/__api__/related-products";
 import { get } from "lodash";
 
 // Generate metadata for the product page
