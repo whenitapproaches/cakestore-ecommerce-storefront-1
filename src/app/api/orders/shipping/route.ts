@@ -5,6 +5,8 @@ import { storefrontApiQuery, storefrontApiMutation, latestVendureAuthToken } fro
 import { getContext } from "lib/getStatic"
 import { ActiveOrderSelector, ShippingMethodsSelector } from "graphql/selectors"
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     const ctx = getContext()
